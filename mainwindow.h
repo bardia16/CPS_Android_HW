@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "accelerometer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,10 +20,12 @@ public:
 
 private slots:
     void on_StartRecording_clicked();
-
     void on_StartAttempt_clicked();
+    void updateTextBrowser(const QString &output); // Added slot declaration
 
 private:
     Ui::MainWindow *ui;
+    Accelerometer *accelerometer;
 };
+
 #endif // MAINWINDOW_H
