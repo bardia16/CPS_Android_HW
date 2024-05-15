@@ -20,6 +20,7 @@ void Accelerometer::start()
     {
         sensor->start();
         timer->start(1000);
+        emit activeChanged();
         qDebug() << "Accelerometer started.";
     }
 }
@@ -30,6 +31,7 @@ void Accelerometer::stop()
     {
         sensor->stop();
         timer->stop();
+        emit activeChanged();
         qDebug() << "Accelerometer stopped.";
     }
 }

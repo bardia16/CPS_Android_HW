@@ -1,66 +1,24 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 
-project(CPS2 VERSION 0.1 LANGUAGES CXX)
-
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+project(QtQuickProject LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sensors)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sensors)
+find_package(Qt6 REQUIRED COMPONENTS Quick Sensors)
 
-set(PROJECT_SOURCES
+qt_standard_project_setup()
+
+qt_add_executable(QtQuickProject
     main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
     accelerometer.cpp
     accelerometer.h
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(CPS2
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-else()
-    if(ANDROID)
-        add_library(CPS2 SHARED
-            ${PROJECT_SOURCES}
-        )
-    else()
-        add_executable(CPS2
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
-
-target_link_libraries(CPS2 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sensors)
-
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.CPS2)
-endif()
-set_target_properties(CPS2 PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+qt_add_qml_module(QtQuickProject
+    URI com.example
+    VERSION 1.0
+    QML_FILES main.qml
 )
 
-include(GNUInstallDirs)
-install(TARGETS CPS2
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(CPS2)
-endif()
+target_link_libraries(QtQuickProject PRIVATE Qt6::Quick Qt6::Sensors)
