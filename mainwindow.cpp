@@ -6,6 +6,10 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    // Set the background color of components to dark gray and text color to white
+    ui->textBrowser->setStyleSheet("background-color: darkgray; color: white;");
+    ui->textBrowser_2->setStyleSheet("background-color: darkgray; color: white;");
+    ui->listView->setStyleSheet("background-color: darkgray; color: white;");
 }
 
 MainWindow::~MainWindow()
