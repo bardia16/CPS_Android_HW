@@ -17,6 +17,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_StartRecording_clicked();
+
+    void on_StartAttempt_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
