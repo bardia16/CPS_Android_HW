@@ -20,16 +20,22 @@ public slots:
     void start();
     void stop();
 
+
 signals:
     void readingUpdated(const QString &output);
     void activeChanged();
+    void calibrationFinished(QString &output);
 
 private slots:
     void onSensorReadingChanged();
+    void Calibration();
+
 
 private:
     QAccelerometer *sensor;
     QTimer *timer;
+    qreal x_bias;
+    qreal y_bias;
 };
 
 #endif // ACCELEROMETER_H
