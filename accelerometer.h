@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtSensors/QAccelerometer>
 #include <QTimer>
+#include <QVector>
 
 class Accelerometer : public QObject
 {
@@ -19,23 +20,24 @@ public:
 public slots:
     void start();
     void stop();
-
+    void calibration();
 
 signals:
     void readingUpdated(const QString &output);
     void activeChanged();
-    void calibrationFinished(QString &output);
+    void calibrationFinished(const QString &output);
 
 private slots:
     void onSensorReadingChanged();
-    void Calibration();
-
+    void onCalibrationReadingChanged();
+    void onCalibrationFinished();
 
 private:
     QAccelerometer *sensor;
     QTimer *timer;
-    qreal x_bias;
-    qreal y_bias;
+    QTimer *calibrationTimer;
+    QVector<double> x_values;
+    QVector<double> y_values;
 };
 
 #endif // ACCELEROMETER_H

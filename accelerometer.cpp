@@ -1,12 +1,14 @@
 #include "accelerometer.h"
 #include <QDebug>
-#define calibrationDuration 1
+#define calibrationDuration 1000 // 1 second in milliseconds
 
 Accelerometer::Accelerometer(QObject *parent) : QObject(parent)
 {
     sensor = new QAccelerometer(this);
     timer = new QTimer(this);
+    calibrationTimer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Accelerometer::onSensorReadingChanged);
+    connect(calibrationTimer, &QTimer::timeout, this, &Accelerometer::onCalibrationFinished);
 }
 
 Accelerometer::~Accelerometer()
@@ -32,6 +34,7 @@ void Accelerometer::stop()
     {
         sensor->stop();
         timer->stop();
+        calibrationTimer->stop();
         emit activeChanged();
         qDebug() << "Accelerometer stopped.";
     }
@@ -54,42 +57,52 @@ void Accelerometer::onSensorReadingChanged()
     }
 }
 
-void Accelerometer::Calibration()
+void Accelerometer::calibration()
 {
-    // Reset biases
-    x_bias = 0.0;
-    y_bias = 0.0;
-    qreal calibrationSamples = 0;
-
-    // Set up a timer to read sensor data for 1 second
-    QTimer calibrateTimer;
-    connect(&calibrateTimer, &QTimer::timeout, [&]() {
-        // Read sensor data
-        QAccelerometerReading *reading = sensor->reading();
-        if (reading)
-        {
-            // Accumulate readings for x and y axes
-            calibrationSamples += 1;
-            x_bias += reading->x();
-            y_bias += reading->y();
-        }
-    });
-
-    // After 1 second, calculate biases and emit signal
-    QObject::connect(&calibrateTimer, &QTimer::timeout, [&]() {
-        // Calculate average biases
-        x_bias /= calibrationSamples;
-        y_bias /= calibrationSamples;
-
-        // Emit signal with calibration results
-        QString output = QStringLiteral("X bias: %1  Y bias: %2")
-                             .arg(QString::number(x_bias, 'f', 1),
-                                  QString::number(y_bias, 'f', 1));
-        emit calibrationFinished(output);
-    });
-
-    // Start the timer
-    calibrateTimer.setSingleShot(true);
-    calibrateTimer.start(calibrationDuration * 1000); // Convert seconds to milliseconds
+    sensor->start();
+    x_values.clear();
+    y_values.clear();
+    calibrationTimer->start(calibrationDuration);
+    connect(sensor, &QAccelerometer::readingChanged, this, &Accelerometer::onCalibrationReadingChanged);
 }
 
+void Accelerometer::onCalibrationReadingChanged()
+{
+    QAccelerometerReading *reading = sensor->reading();
+    if (reading)
+    {
+        x_values.append(reading->x());
+        y_values.append(reading->y());
+    }
+    else
+    {
+        qDebug() << "No reading available.";
+    }
+}
+
+void Accelerometer::onCalibrationFinished()
+{
+    sensor->stop();
+    calibrationTimer->stop();
+    disconnect(sensor, &QAccelerometer::readingChanged, this, &Accelerometer::onCalibrationReadingChanged);
+
+    double x_sum = 0.0;
+    double y_sum = 0.0;
+
+    for (double x : x_values)
+        x_sum += x;
+
+    for (double y : y_values)
+        y_sum += y;
+    //qDebug() << x_sum;
+   // qDebug() << x_values.size();
+    double x_bias = x_sum / x_values.size();
+    double y_bias = y_sum / y_values.size();
+
+    QString output = QStringLiteral("Calibration compelete\tX bias: %1 Y bias: %2")
+                         .arg(QString::number(x_bias, 'f', 1),
+                              QString::number(y_bias, 'f', 1));
+    qDebug() << "Biases: " + output;
+
+    emit calibrationFinished(output);
+}

@@ -10,18 +10,18 @@ ApplicationWindow {
     title: qsTr("MainWindow")
 
     function updateAccelText(output) {
-        accelText.text = "Accel:" + output;
-        console.log("Reading updated:", output);
+        accelText.text = "Accel: " + output;
+        //console.log("Reading updated:", output);
     }
 
-    function updateListView(output) {
-
+    function updateStatusLabel(output) {
+        statusText.text = "Status: " + output;
     }
 
     Accelerometer {
         id: accelerometer
-        onReadingUpdated: updateAccelText(output);
-        onCalibrationFinished: updateListView(output);
+        onReadingUpdated: updateAccelText(output)
+        onCalibrationFinished: updateStatusLabel(output)
     }
 
 
@@ -29,9 +29,9 @@ ApplicationWindow {
         anchors.fill: parent
         spacing: 10  // Add spacing between elements
 
-        // Angle, Accel, and Patterns rectangles
+        // Status, Angle, Accel, and Patterns rectangles
         ColumnLayout {
-            Layout.alignment: Qt.AlignHCenter
+            //Layout.alignment: Qt.AlignHCenter
             spacing: 10
 
             Rectangle {
@@ -42,13 +42,23 @@ ApplicationWindow {
                     spacing: 10
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                     Label {
-                        text: qsTr("Angle:")
+                        id: statusText
+                        text: qsTr("Status:")
                         font.family: "Segoe UI"
                     }
-                    Text {
-                        id: textBrowser2
-                        text: "Angle value"
-                        color: "white"
+                }
+            }
+
+            Rectangle {
+                Layout.preferredHeight: 51
+                color: "darkgray"
+                ColumnLayout {
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 10
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+                    Label {
+                        id: angleText
+                        text: qsTr("Angle:")
                         font.family: "Segoe UI"
                     }
                 }
@@ -66,11 +76,6 @@ ApplicationWindow {
                         text: qsTr("Accel:")
                         font.family: "Segoe UI"
                     }
-                    /*Label {
-                        id: accelText
-                        text: qsTr("Accelerometer readings will appear here")
-                        color: "white"
-                    }*/
                 }
             }
 
@@ -125,13 +130,7 @@ ApplicationWindow {
                 text: qsTr("Calibration")
                 Layout.preferredHeight: 41
                 onClicked: {
-                    if (text === "Start Recording") {
-                        text = "Stop Recording"
-                        accelerometer.start()
-                    } else {
-                        text = "Start Recording"
-                        accelerometer.stop()
-                    }
+                accelerometer.calibration();
                 }
             }
 
