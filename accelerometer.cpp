@@ -1,8 +1,7 @@
 #include "accelerometer.h"
 #include <QDebug>
-#define calibrationDuration 1000 // 1 second in milliseconds
 
-Accelerometer::Accelerometer(QObject *parent) : QObject(parent)
+Accelerometer::Accelerometer(QObject *parent) : QObject(parent), x_bias(0.0), y_bias(0.0)
 {
     sensor = new QAccelerometer(this);
     timer = new QTimer(this);
@@ -22,7 +21,7 @@ void Accelerometer::start()
     if (!sensor->isActive())
     {
         sensor->start();
-        timer->start(1000);
+        timer->start(sampling_interval);
         emit activeChanged();
         qDebug() << "Accelerometer started.";
     }
@@ -49,6 +48,7 @@ void Accelerometer::onSensorReadingChanged()
                              .arg(QString::number(reading->x(), 'f', 1),
                                   QString::number(reading->y(), 'f', 1));
         emit readingUpdated(output);
+        emit newAcceleration(reading->x(), reading->y());
         qDebug() << output;
     }
     else
@@ -94,12 +94,11 @@ void Accelerometer::onCalibrationFinished()
 
     for (double y : y_values)
         y_sum += y;
-    //qDebug() << x_sum;
-   // qDebug() << x_values.size();
-    double x_bias = x_sum / x_values.size();
-    double y_bias = y_sum / y_values.size();
 
-    QString output = QStringLiteral("Calibration compelete\tX bias: %1 Y bias: %2")
+    x_bias = x_sum / x_values.size();
+    y_bias = y_sum / y_values.size();
+
+    QString output = QStringLiteral("Calibration complete\tX bias: %1 Y bias: %2")
                          .arg(QString::number(x_bias, 'f', 1),
                               QString::number(y_bias, 'f', 1));
     qDebug() << "Biases: " + output;

@@ -6,6 +6,9 @@
 #include <QTimer>
 #include <QVector>
 
+#define calibrationDuration 1000 // 1sec
+#define sampling_interval 100 // 100ms
+
 class Accelerometer : public QObject
 {
     Q_OBJECT
@@ -17,6 +20,9 @@ public:
 
     bool isActive() const { return sensor->isActive(); }
 
+    Q_INVOKABLE double getXBias() const { return x_bias; }
+    Q_INVOKABLE double getYBias() const { return y_bias; }
+
 public slots:
     void start();
     void stop();
@@ -26,6 +32,7 @@ signals:
     void readingUpdated(const QString &output);
     void activeChanged();
     void calibrationFinished(const QString &output);
+    void newAcceleration(double x, double y);
 
 private slots:
     void onSensorReadingChanged();
@@ -38,6 +45,8 @@ private:
     QTimer *calibrationTimer;
     QVector<double> x_values;
     QVector<double> y_values;
+    double x_bias;
+    double y_bias;
 };
 
 #endif // ACCELEROMETER_H

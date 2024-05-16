@@ -2,17 +2,21 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "accelerometer.h"
-#include <QDebug>
+#include "movementdatabase.h"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<Accelerometer>("com.example", 1, 0, "Accelerometer");
+    qmlRegisterType<MovementDatabase>("com.example", 1, 0, "MovementDatabase"); // Register MovementDatabase
 
     QQmlApplicationEngine engine;
-    const QUrl url(u"qrc:/QtQuickProject/Main.qml"_qs);
 
+    MovementDatabase movementDatabase;
+    engine.rootContext()->setContextProperty("movementDatabase", &movementDatabase);
+
+    const QUrl url(u"qrc:/QtQuickProject/Main.qml"_qs);
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreationFailed,
@@ -21,5 +25,6 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
 
     engine.load(url);
+
     return app.exec();
 }

@@ -11,7 +11,6 @@ ApplicationWindow {
 
     function updateAccelText(output) {
         accelText.text = "Accel: " + output;
-        //console.log("Reading updated:", output);
     }
 
     function updateStatusLabel(output) {
@@ -20,18 +19,27 @@ ApplicationWindow {
 
     Accelerometer {
         id: accelerometer
-        onReadingUpdated: updateAccelText(output)
+        onReadingUpdated: {
+            updateAccelText(output)
+            // Assuming output contains the x and y values as strings separated by spaces
+            var values = output.split(" ");
+            //console.log(values);
+            movementDatabase.handleNewAcceleration(parseFloat(values[1]), parseFloat(values[4]), accelerometer.getXBias(), accelerometer.getYBias())
+        }
         onCalibrationFinished: updateStatusLabel(output)
     }
 
+    MovementDatabase {
+        id: movementDatabase
+    }
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 10  // Add spacing between elements
+        spacing: 10
 
         // Status, Angle, Accel, and Patterns rectangles
         ColumnLayout {
-            //Layout.alignment: Qt.AlignHCenter
+            anchors.leftMargin: 20
             spacing: 10
 
             Rectangle {
@@ -100,17 +108,14 @@ ApplicationWindow {
             model: ListModel {
                 ListElement { name: "Pattern 1" }
                 ListElement { name: "Pattern 2" }
-                // Add more patterns as needed
             }
             delegate: Item {
                 width: listView.width
-                height: 40  // Adjust height as needed
-
+                height: 40
                 Rectangle {
                     width: parent.width
                     height: parent.height
                     color: "darkgray"
-
                     Text {
                         anchors.centerIn: parent
                         text: model.name
@@ -130,7 +135,7 @@ ApplicationWindow {
                 text: qsTr("Calibration")
                 Layout.preferredHeight: 41
                 onClicked: {
-                accelerometer.calibration();
+                    accelerometer.calibration();
                 }
             }
 
