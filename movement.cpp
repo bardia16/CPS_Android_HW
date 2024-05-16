@@ -1,7 +1,7 @@
 #include "movement.h"
 #include <QDebug>
 Movement::Movement(QObject *parent)
-    : QObject(parent), sampleInterval(0.1) // assuming a sample interval of 0.1 seconds
+    : QObject(parent), sampleInterval(0.005) // assuming a sample interval of 0.25 seconds
 {
 }
 
@@ -12,16 +12,30 @@ void Movement::addAcceleration(double x, double y)
 
 qreal Movement::calculateDistanceTraveled() const
 {
-    qreal distance = 0.0;
+    qreal totalDistance = 0.0;
+    qreal velocityX = 0.0;
+    qreal velocityY = 0.0;
+    qreal previousVelocityX = 0.0;
+    qreal previousVelocityY = 0.0;
     for (const QVector3D &acceleration : accelerations) {
+        velocityX += acceleration.x() * sampleInterval;
+        velocityY += acceleration.y() * sampleInterval;
 
-        // Assuming constant acceleration during the sample interval
-        qreal distanceX = 0.5 * acceleration.x() * sampleInterval * sampleInterval;
-        qreal distanceY = 0.5 * acceleration.y() * sampleInterval * sampleInterval;
-        distance += qSqrt(distanceX * distanceX + distanceY * distanceY);
+        qreal averageVelocityX = (previousVelocityX + velocityX) / 2;
+        qreal averageVelocityY = (previousVelocityY + velocityY) / 2;
+
+        // Calculate the distance traveled in this sample interval
+        qreal distanceX = averageVelocityX * sampleInterval;
+        qreal distanceY = averageVelocityY * sampleInterval;
+
+        totalDistance += std::sqrt(distanceX * distanceX + distanceY * distanceY);
+
+        // Update previous velocities for the next iteration
+        previousVelocityX = velocityX;
+        previousVelocityY = velocityY;
     }
-    qDebug() << distance;
-    return distance;
+    qDebug() << totalDistance;
+    return totalDistance;
 }
 
 
@@ -32,22 +46,44 @@ void Movement::setStartPosition(qreal x, qreal y)
 
 qreal Movement::calculateDistanceTraveledX() const
 {
-    qreal distance = 0.0;
+    qreal totalDistance = 0.0;
+    qreal velocityX = 0.0;
+    qreal previousVelocityX = 0.0;
     for (const QVector3D &acceleration : accelerations) {
-        qreal distanceX = 0.5 * acceleration.x() * sampleInterval * sampleInterval;
-        distance += distanceX;
+        velocityX += acceleration.x() * sampleInterval;
+
+        qreal averageVelocityX = (previousVelocityX + velocityX) / 2;
+
+        // Calculate the distance traveled in this sample interval
+        qreal distanceX = averageVelocityX * sampleInterval;
+
+        totalDistance += distanceX;
+
+        // Update previous velocities for the next iteration
+        previousVelocityX = velocityX;
     }
-    return distance;
+    return totalDistance;
 }
 
 qreal Movement::calculateDistanceTraveledY() const
 {
-    qreal distance = 0.0;
+    qreal totalDistance = 0.0;
+    qreal velocityY = 0.0;
+    qreal previousVelocityY = 0.0;
     for (const QVector3D &acceleration : accelerations) {
-        qreal distanceY = 0.5 * acceleration.y() * sampleInterval * sampleInterval;
-        distance += distanceY;
+        velocityY += acceleration.y() * sampleInterval;
+
+        qreal averageVelocityY = (previousVelocityY + velocityY) / 2;
+
+        // Calculate the distance traveled in this sample interval
+        qreal distanceY = averageVelocityY * sampleInterval;
+
+        totalDistance += distanceY;
+
+        // Update previous velocities for the next iteration
+        previousVelocityY = velocityY;
     }
-    return distance;
+    return totalDistance;
 }
 
 QVector3D Movement::getCurrentPosition() const

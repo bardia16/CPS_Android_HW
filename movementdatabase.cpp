@@ -9,9 +9,13 @@ MovementDatabase::MovementDatabase(QObject *parent)
     m_movements.append(currentMovement);
 }
 
-void MovementDatabase::handleNewAcceleration(double x, double y, double xBias, double yBias)
+void MovementDatabase::handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias)
 {
-    if (std::abs(x) < min_acceleration && std::abs(y) < min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance)
+    qDebug() << "Velocities:";
+    qDebug() << velocityX;
+    qDebug() << velocityY;
+    if (std::abs(x) < min_acceleration && std::abs(y) < min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance
+        && (std::abs(velocityX) < min_velocity && std::abs(velocityY) < min_velocity))
     {
         //qreal dist = currentMovement->calculateDistanceTraveled();
         createNewMovement();

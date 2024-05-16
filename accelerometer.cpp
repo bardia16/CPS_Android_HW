@@ -2,7 +2,7 @@
 #include <QDebug>
 
 Accelerometer::Accelerometer(QObject *parent) : QObject(parent), x_bias(0.0), y_bias(0.0),
-    xKalman(0.1, 0.1, 0.1, 0.0), yKalman(0.1, 0.1, 0.1, 0.0) // Initialize Kalman filters
+    xKalman(0.1, 1, 0.1, 0.0), yKalman(0.1, 1, 0.1, 0.0), velocity(0.0),velocityX(0.0), velocityY(0.0) // Initialize Kalman filters
 {
     sensor = new QAccelerometer(this);
     timer = new QTimer(this);
@@ -48,32 +48,81 @@ void Accelerometer::onSensorReadingChanged()
         qreal x = reading->x();
         qreal y = reading->y();
 
-        // Adjust for bias
-        if (std::abs(x) <= std::abs(x_bias))
-            x = 0.0;
-        else
-            x -= x_bias;
 
-        if (std::abs(y) <= std::abs(y_bias))
-            y = 0.0;
-        else
-            y -= y_bias;
 
         // Apply Kalman filter
         x = xKalman.update(x);
         y = yKalman.update(y);
 
-        QString output = QStringLiteral("X: %1  Y: %2")
+        // Adjust for bias
+        if (std::abs(x) <= accel_threshold)
+            x = 0.0;
+        else
+            x -= x_bias;
+
+        if (std::abs(y) <= accel_threshold)
+            y = 0.0;
+        else
+            y -= y_bias;
+
+        if (x == 0 && y == 0) // frictional accel
+        {
+            QVector2D newVelocities = frictionalAccel(velocityX, velocityY);
+            velocityX = newVelocities.x();
+            velocityY = newVelocities.y();
+
+        }
+
+        velocityX += x * sampling_interval/1000;
+        velocityY += y * sampling_interval/1000;
+        //velocity += std::sqrt(velocityX * velocityX + velocityY * velocityY);
+
+        QString output = QStringLiteral("X: %1  Y: %2  Velocity: X: %3  Y: %4")
                              .arg(QString::number(x, 'f', 2),
-                                  QString::number(y, 'f', 2));
+                                  QString::number(y, 'f', 2),
+                                  QString::number(velocityX, 'f', 2),
+                                  QString::number(velocityY, 'f', 2));
         emit readingUpdated(output);
-        emit newAcceleration(x, y);
+        emit newAcceleration(x, y, velocityX, velocityY);
         qDebug() << output;
     }
     else
     {
         qDebug() << "No reading available.";
     }
+}
+
+QVector2D Accelerometer::frictionalAccel(qreal velocityX, qreal velocityY)
+{
+    qreal frictionalDecay = accel_threshold * sampling_interval / 1000;
+
+    if (velocityX > 0) // If velocityX is positive
+    {
+        velocityX -= frictionalDecay;
+        if (velocityX < 0) // Ensure velocity doesn't go negative
+            velocityX = 0;
+    }
+    else if (velocityX < 0) // If velocityX is negative
+    {
+        velocityX += frictionalDecay;
+        if (velocityX > 0) // Ensure velocity doesn't go positive
+            velocityX = 0;
+    }
+
+    if (velocityY > 0) // If velocityY is positive
+    {
+        velocityY -= frictionalDecay;
+        if (velocityY < 0) // Ensure velocity doesn't go negative
+            velocityY = 0;
+    }
+    else if (velocityY < 0) // If velocityY is negative
+    {
+        velocityY += frictionalDecay;
+        if (velocityY > 0) // Ensure velocity doesn't go positive
+            velocityY = 0;
+    }
+
+    return QVector2D(velocityX, velocityY);
 }
 
 void Accelerometer::calibration()

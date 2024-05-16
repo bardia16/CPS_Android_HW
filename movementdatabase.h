@@ -12,7 +12,7 @@ class MovementDatabase : public QObject
 public:
     explicit MovementDatabase(QObject *parent = nullptr);
 
-    Q_INVOKABLE void handleNewAcceleration(double x, double y, double xBias, double yBias);
+    Q_INVOKABLE void handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias);
 
     QList<Movement *> movements() const;
 

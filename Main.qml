@@ -22,10 +22,11 @@ ApplicationWindow {
         onReadingUpdated: {
             updateAccelText(output)
             // Assuming output contains the x and y values as strings separated by spaces
-            var values = output.split(" ");
+            /*var values = output.split(" ");
             //console.log(values);
-            movementDatabase.handleNewAcceleration(parseFloat(values[1]), parseFloat(values[4]), accelerometer.getXBias(), accelerometer.getYBias())
+            movementDatabase.handleNewAcceleration(parseFloat(values[1]), parseFloat(values[4]), accelerometer.getXBias(), accelerometer.getYBias())*/
         }
+        onNewAcceleration: movementDatabase.handleNewAcceleration(x, y, velocityX, velocityY, accelerometer.getXBias(), accelerometer.getYBias())
         onCalibrationFinished: updateStatusLabel(output)
     }
 

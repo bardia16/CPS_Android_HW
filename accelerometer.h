@@ -5,9 +5,13 @@
 #include <QtSensors/QAccelerometer>
 #include <QTimer>
 #include <QVector>
+#include <QVector2D>
 
+
+#define frictional_accel 0.15
+#define accel_threshold 0.5
 #define calibrationDuration 1000 // 1sec
-#define sampling_interval 100 // 100ms = 0.1sec
+#define sampling_interval 5 // 5ms = 0.005sec
 
 class KalmanFilter
 {
@@ -58,7 +62,7 @@ signals:
     void readingUpdated(const QString &output);
     void activeChanged();
     void calibrationFinished(const QString &output);
-    void newAcceleration(double x, double y);
+    void newAcceleration(double x, double y, double velocityX, double velocityY);
 
 private slots:
     void onSensorReadingChanged();
@@ -75,6 +79,10 @@ private:
     double y_bias;
     KalmanFilter xKalman; // Kalman filter for x-axis
     KalmanFilter yKalman; // Kalman filter for y-axis
+    double velocity;
+    double velocityX;
+    double velocityY;
+    QVector2D frictionalAccel(qreal velocityX, qreal velocityY);
 };
 
 #endif // ACCELEROMETER_H
