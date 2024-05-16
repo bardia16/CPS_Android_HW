@@ -13,7 +13,7 @@ void MovementDatabase::handleNewAcceleration(double x, double y, double xBias, d
 {
     if (std::abs(x) < min_acceleration && std::abs(y) < min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance)
     {
-        qreal dist = currentMovement->calculateDistanceTraveled();
+        //qreal dist = currentMovement->calculateDistanceTraveled();
         createNewMovement();
         qDebug() << "Creating new movements";
     }

@@ -9,6 +9,32 @@
 #define calibrationDuration 1000 // 1sec
 #define sampling_interval 100 // 100ms = 0.1sec
 
+class KalmanFilter
+{
+public:
+    KalmanFilter(double processNoise, double measurementNoise, double estimationError, double initialValue)
+        : q(processNoise), r(measurementNoise), p(estimationError), x(initialValue) {}
+
+    double update(double measurement)
+    {
+        // Prediction update
+        p = p + q;
+
+        // Measurement update
+        double k = p / (p + r); // Kalman gain
+        x = x + k * (measurement - x); // Update estimate
+        p = (1 - k) * p; // Update error covariance
+
+        return x;
+    }
+
+private:
+    double q; // Process noise covariance
+    double r; // Measurement noise covariance
+    double p; // Estimation error covariance
+    double x; // Value
+};
+
 class Accelerometer : public QObject
 {
     Q_OBJECT
@@ -47,6 +73,8 @@ private:
     QVector<double> y_values;
     double x_bias;
     double y_bias;
+    KalmanFilter xKalman; // Kalman filter for x-axis
+    KalmanFilter yKalman; // Kalman filter for y-axis
 };
 
 #endif // ACCELEROMETER_H

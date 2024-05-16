@@ -1,7 +1,8 @@
 #include "accelerometer.h"
 #include <QDebug>
 
-Accelerometer::Accelerometer(QObject *parent) : QObject(parent), x_bias(0.0), y_bias(0.0)
+Accelerometer::Accelerometer(QObject *parent) : QObject(parent), x_bias(0.0), y_bias(0.0),
+    xKalman(0.1, 0.1, 0.1, 0.0), yKalman(0.1, 0.1, 0.1, 0.0) // Initialize Kalman filters
 {
     sensor = new QAccelerometer(this);
     timer = new QTimer(this);
@@ -46,20 +47,25 @@ void Accelerometer::onSensorReadingChanged()
     {
         qreal x = reading->x();
         qreal y = reading->y();
+
+        // Adjust for bias
         if (std::abs(x) <= std::abs(x_bias))
             x = 0.0;
         else
             x -= x_bias;
 
-        if(std::abs(y) <= std::abs(y_bias))
+        if (std::abs(y) <= std::abs(y_bias))
             y = 0.0;
         else
             y -= y_bias;
 
+        // Apply Kalman filter
+        x = xKalman.update(x);
+        y = yKalman.update(y);
+
         QString output = QStringLiteral("X: %1  Y: %2")
                              .arg(QString::number(x, 'f', 2),
                                   QString::number(y, 'f', 2));
-
         emit readingUpdated(output);
         emit newAcceleration(x, y);
         qDebug() << output;
