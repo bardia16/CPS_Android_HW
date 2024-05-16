@@ -5,6 +5,7 @@
 #include <QtSensors/QAccelerometer>
 #include <QTimer>
 #include <QTextBrowser>
+#include <QVector3D>
 
 class Accelerometer : public QObject
 {
@@ -19,6 +20,7 @@ public slots:
 
 signals:
     void readingUpdated(const QString &output);
+    void newAcceleration(const QVector3D &acceleration); // Added signal declaration
 
 private slots:
     void onSensorReadingChanged();
@@ -26,6 +28,7 @@ private slots:
 private:
     QAccelerometer *sensor;
     QTimer *timer;
+    bool checkForNewAcceleration(const QVector3D &acceleration) const;
 };
 
 #endif // ACCELEROMETER_H

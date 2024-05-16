@@ -25,6 +25,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(CPS2
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        movement.h movement.cpp
     )
 else()
     if(ANDROID)
