@@ -7,7 +7,7 @@
 #include <QVector>
 
 #define calibrationDuration 1000 // 1sec
-#define sampling_interval 100 // 100ms
+#define sampling_interval 100 // 100ms = 0.1sec
 
 class Accelerometer : public QObject
 {

@@ -44,11 +44,24 @@ void Accelerometer::onSensorReadingChanged()
     QAccelerometerReading *reading = sensor->reading();
     if (reading)
     {
+        qreal x = reading->x();
+        qreal y = reading->y();
+        if (std::abs(x) <= std::abs(x_bias))
+            x = 0.0;
+        else
+            x -= x_bias;
+
+        if(std::abs(y) <= std::abs(y_bias))
+            y = 0.0;
+        else
+            y -= y_bias;
+
         QString output = QStringLiteral("X: %1  Y: %2")
-                             .arg(QString::number(reading->x(), 'f', 1),
-                                  QString::number(reading->y(), 'f', 1));
+                             .arg(QString::number(x, 'f', 2),
+                                  QString::number(y, 'f', 2));
+
         emit readingUpdated(output);
-        emit newAcceleration(reading->x(), reading->y());
+        emit newAcceleration(x, y);
         qDebug() << output;
     }
     else

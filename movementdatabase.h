@@ -22,6 +22,7 @@ signals:
 private:
     Movement *currentMovement;
     QList<Movement *> m_movements;
+    void createNewMovement();
 };
 
 #endif // MOVEMENTDATABASE_H

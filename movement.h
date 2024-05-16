@@ -5,6 +5,8 @@
 #include <QVector>
 #include <QVector3D>
 
+#define min_acceleration 0.1
+
 class Movement : public QObject
 {
     Q_OBJECT
@@ -13,9 +15,14 @@ public:
 
     void addAcceleration(double x, double y);
     qreal calculateDistanceTraveled() const;
-    QVector<QVector3D> accelerations; // Make this public or add a getter
+    qreal calculateDistanceTraveledX() const;
+    qreal calculateDistanceTraveledY() const;
+    QVector<QVector3D> accelerations;
+    void setStartPosition(qreal x, qreal y);
+    QVector3D getCurrentPosition() const;
 
 private:
+    QVector3D startPosition;
     qreal sampleInterval;
 };
 
