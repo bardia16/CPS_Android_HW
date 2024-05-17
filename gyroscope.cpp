@@ -117,6 +117,7 @@ void Gyroscope::onSensorReadingChanged()
         }
 
         QString output = QStringLiteral("Alpha: %1").arg(QString::number(normalizedAngle, 'f', 2));
+
         emit readingUpdated(output);
         emit newRotation(normalizedAngle);
 
