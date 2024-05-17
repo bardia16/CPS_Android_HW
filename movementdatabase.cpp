@@ -2,8 +2,7 @@
 #include <cmath>
 #include <QDebug>
 
-#define min_distance 0.01
-
+#define min_distance 0.1
 MovementDatabase::MovementDatabase(QObject *parent)
     : QObject(parent), currentMovement(new Movement(this))
 {
@@ -12,8 +11,11 @@ MovementDatabase::MovementDatabase(QObject *parent)
 
 void MovementDatabase::handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias)
 {
-    if (std::abs(x) < min_acceleration && std::abs(y) < min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance
-        && (std::abs(velocityX) < min_velocity && std::abs(velocityY) < min_velocity))
+    /*qDebug() << "Velocities:";
+    qDebug() << velocityX;
+    qDebug() << velocityY;*/
+    if (std::abs(x) <= min_acceleration && std::abs(y) <= min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance
+        && (std::abs(velocityX) <= min_velocity && std::abs(velocityY) <= min_velocity))
     {
         createNewMovement();
         qDebug() << "Creating new movements";
@@ -41,13 +43,17 @@ void MovementDatabase::reset()
 
 void MovementDatabase::createNewMovement()
 {
+    QVector3D lastPosition;
     Movement* newMovement = new Movement(this);
     newMovement->setStartPosition(0.0, 0.0);
+    lastPosition = QVector3D(0.0, 0.0, 0.0);
     if (!m_movements.isEmpty()) {
-        QVector3D lastPosition = m_movements.last()->getCurrentPosition();
+        lastPosition= m_movements.last()->getCurrentPosition();
         newMovement->setStartPosition(lastPosition.x(), lastPosition.y());
-        emit movementsUpdated(lastPosition.x(), lastPosition.y());
     }
+    emit movementsUpdated(lastPosition.x(), lastPosition.y());
+    qDebug() << "New update to positions";
+    qDebug() << lastPosition.y();
     m_movements.append(newMovement);
     currentMovement = newMovement;
 }
