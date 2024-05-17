@@ -2,7 +2,7 @@
 #include <QDebug>
 
 Movement::Movement(QObject *parent)
-    : QObject(parent), sampleInterval(0.005), currentAngle(0.0) // assuming a sample interval of 0.005 seconds
+    : QObject(parent), sampleInterval(0.05), currentAngle(0.0) // assuming a sample interval of 0.05 seconds
 {
 }
 
@@ -96,8 +96,27 @@ QVector3D Movement::getCurrentPosition() const
     qreal distanceTraveledX = calculateDistanceTraveledX();
     qreal distanceTraveledY = calculateDistanceTraveledY();
     QVector3D currentPosition = startPosition;
-    currentPosition.setX(startPosition.x() + distanceTraveledX);
-    currentPosition.setY(startPosition.y() + distanceTraveledY);
+    if (currentAngle == 0)
+    {
+        currentPosition.setX(startPosition.x() + distanceTraveledX);
+        currentPosition.setY(startPosition.y() + distanceTraveledY);
+    }
+    else if (currentAngle == 90)
+    {
+        currentPosition.setX(startPosition.x() - distanceTraveledY);
+        currentPosition.setY(startPosition.y() + distanceTraveledX);
+    }
+    else if (currentAngle == -90)
+    {
+        currentPosition.setX(startPosition.x() + distanceTraveledY);
+        currentPosition.setY(startPosition.y() - distanceTraveledX);
+    }
+    else if (currentAngle == 180)
+    {
+        currentPosition.setX(startPosition.x() - distanceTraveledX);
+        currentPosition.setY(startPosition.y() - distanceTraveledY);
+    }
+
     currentPosition.setZ(0.0);
     qDebug() << "New starting position:";
     qDebug() << currentPosition;
