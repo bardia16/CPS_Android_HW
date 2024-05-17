@@ -17,7 +17,7 @@ public:
     QList<Movement *> movements() const;
 
 signals:
-    void movementsUpdated();
+    void movementsUpdated(qreal x_pos, qreal y_pos);
 
 private:
     Movement *currentMovement;
