@@ -9,12 +9,13 @@ ApplicationWindow {
     height: 800
     title: qsTr("MainWindow")
 
-    function addNewMovement(xValue, yValue) {
+    function addNewMovement(xValue, yValue, angle) {
         // Append the new item to the model
         var formattedX = xValue.toFixed(2);
         var formattedY = yValue.toFixed(2);
+        var formattedAngle = angle.toFixed(2);
 
-        outputArea.text += "X: "+ formattedX + "  Y: " + formattedY + "\n";
+        outputArea.text += "Position: " + "X: "+ formattedX + "  Y: " + formattedY + "  Angle: "+ formattedAngle + "\n";
     }
 
     function updateAccelText(output) {
@@ -41,12 +42,12 @@ ApplicationWindow {
     Gyroscope {
         id: gyroscope
         onReadingUpdated: updateGyroText(output)
-        onNewRotation: updateGyroText(output)
+        onNewRotation: movementDatabase.handleNewAngle(alpha)
     }
 
     MovementDatabase {
         id: movementDatabase
-        onMovementsUpdated: addNewMovement(x_pos, y_pos);
+        onMovementsUpdated: addNewMovement(x_pos, y_pos, angle);
     }
 
     ColumnLayout {
@@ -126,9 +127,11 @@ ApplicationWindow {
                 if (text === "Start Recording") {
                     text = "Stop Recording"
                     accelerometer.start()
+                    gyroscope.start()
                 } else {
                     text = "Start Recording"
                     accelerometer.stop()
+                    gyroscope.stop()
                 }
             }
         }

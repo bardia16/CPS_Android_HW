@@ -1,5 +1,6 @@
 #include "gyroscope.h"
 #include <QDebug>
+#include <math.h>
 
 Gyroscope::Gyroscope(QObject *parent)
     : QObject(parent), alpha(0.0), alphaKalman(0.1, 1, 0.1, 0.0)
@@ -20,7 +21,7 @@ void Gyroscope::start()
     if (!sensor->isActive())
     {
         sensor->start();
-        timer->start(5);
+        timer->start(sampling_interval);
         emit activeChanged();
         qDebug() << "Gyroscope started.";
     }
@@ -54,8 +55,8 @@ void Gyroscope::onSensorReadingChanged()
         // Apply Kalman filter
         z = alphaKalman.update(z);
 
-        alpha += z * 0.005; // 0.005 is the sample interval in seconds
-
+        alpha += z * sampling_interval;
+        alpha = fmod(alpha, 360.0);
         QString output = QStringLiteral("Rotation (alpha): %1").arg(QString::number(alpha, 'f', 2));
         emit readingUpdated(output);
         emit newRotation(alpha);

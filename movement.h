@@ -21,6 +21,7 @@ public:
     qreal calculateDistanceTraveledY() const;
     QVector<QVector3D> accelerations;
     void setStartPosition(qreal x, qreal y);
+    void setStartAngle(qreal angle);
     QVector3D getCurrentPosition() const;
     double getCurrentAngle() const;
 

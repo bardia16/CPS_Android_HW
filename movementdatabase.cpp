@@ -37,23 +37,28 @@ void MovementDatabase::reset()
     currentMovement = new Movement(this);
     m_movements.clear();
     m_movements.append(currentMovement);
-    emit movementsUpdated(0.0, 0.0);
+    emit movementsUpdated(0.0, 0.0, 0.0);
     qDebug() << "MovementDatabase reset.";
 }
 
 void MovementDatabase::createNewMovement()
 {
     QVector3D lastPosition;
+    qreal lastAngle;
     Movement* newMovement = new Movement(this);
     newMovement->setStartPosition(0.0, 0.0);
+    newMovement->setStartAngle(0.0);
     lastPosition = QVector3D(0.0, 0.0, 0.0);
+    lastAngle = 0.0;
     if (!m_movements.isEmpty()) {
-        lastPosition= m_movements.last()->getCurrentPosition();
+        lastPosition = m_movements.last()->getCurrentPosition();
+        lastAngle = m_movements.last()->getCurrentAngle();
         newMovement->setStartPosition(lastPosition.x(), lastPosition.y());
+        newMovement->setStartAngle(lastAngle);
     }
-    emit movementsUpdated(lastPosition.x(), lastPosition.y());
-    qDebug() << "New update to positions";
-    qDebug() << lastPosition.y();
+    emit movementsUpdated(lastPosition.x(), lastPosition.y(), lastAngle);
+    //qDebug() << "New update to positions";
+    //qDebug() << lastPosition.y();
     m_movements.append(newMovement);
     currentMovement = newMovement;
 }

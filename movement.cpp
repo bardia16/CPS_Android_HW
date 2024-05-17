@@ -13,10 +13,10 @@ void Movement::addAcceleration(double x, double y)
 
 void Movement::addAngleChange(double alpha)
 {
-    currentAngle += alpha;
+    currentAngle = alpha;
     // Ensure the angle stays within the range of 0 to 360 degrees
-    if (currentAngle >= 360.0) currentAngle -= 360.0;
-    if (currentAngle < 0.0) currentAngle += 360.0;
+    //if (currentAngle >= 360.0) currentAngle -= 360.0;
+    //if (currentAngle < 0.0) currentAngle += 360.0;
 }
 
 qreal Movement::calculateDistanceTraveled() const
@@ -50,6 +50,11 @@ qreal Movement::calculateDistanceTraveled() const
 void Movement::setStartPosition(qreal x, qreal y)
 {
     startPosition = QVector3D(x, y, 0.0);
+}
+
+void Movement::setStartAngle(qreal angle)
+{
+    currentAngle = angle;
 }
 
 qreal Movement::calculateDistanceTraveledX() const

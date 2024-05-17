@@ -19,7 +19,7 @@ public:
     QList<Movement *> movements() const;
 
 signals:
-    void movementsUpdated(qreal x_pos, qreal y_pos);
+    void movementsUpdated(qreal x_pos, qreal y_pos, qreal angle);
     void angleUpdated(double alpha);
 
 private:

@@ -5,6 +5,8 @@
 #include <QtSensors/QGyroscope>
 #include <QTimer>
 
+#define sampling_interval 5 // 5ms = 0.005sec
+
 class GyroscopeKalmanFilter
 {
 public:
