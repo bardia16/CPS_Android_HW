@@ -162,6 +162,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.preferredHeight: 41
             onClicked: {
+                 gyroscope.reset()
                 // Add your reset function here
 
             }
