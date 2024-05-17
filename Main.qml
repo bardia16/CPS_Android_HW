@@ -12,7 +12,8 @@ ApplicationWindow {
     function addNewMovement(xValue, yValue) {
 
         // Append the new item to the model
-        outputArea.append("X: "+ xValue + "  Y: " + yValue + "\n");
+        newLine = "X: "+ xValue + "  Y: " + yValue + "\n";
+        outputArea.text = outputArea.text + newLine;
     }
 
     function updateAccelText(output) {
@@ -110,18 +111,18 @@ ApplicationWindow {
         }
 
         // TextArea in ScrollView
-               ScrollView {
-                   width: parent.width
-                   height: 200
-
-                   TextArea {
-                       id: outputArea
-                       anchors.fill: parent
-                       readOnly: true
-                       wrapMode: Text.Wrap
-                       text: "Output will be displayed here..."
-                   }
-               }
+        ScrollView{
+                        width: parent.width
+                        height: 500
+                        TextArea{
+                            id: outputArea
+                            anchors.fill: parent
+                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                            font.pixelSize: 18
+                            font.bold: true
+                            readOnly: true
+                        }
+                    }
 
 
         // Buttons
