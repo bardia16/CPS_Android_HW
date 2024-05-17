@@ -12,7 +12,10 @@ ApplicationWindow {
     function addNewMovement(xValue, yValue) {
 
         // Append the new item to the model
-        outputArea.append("X: "+ xValue + "  Y: " + yValue + "\n");
+        var formattedX = xValue.toFixed(2);
+        var formattedY = yValue.toFixed(2);
+
+        outputArea.text += "X: "+ formattedX + "  Y: " + formattedY + "\n";
     }
 
     function updateAccelText(output) {
@@ -43,142 +46,120 @@ ApplicationWindow {
 
     ColumnLayout {
         anchors.fill: parent
+        anchors.margins: 20
         spacing: 10
 
-        // Status, Angle, Accel, and Patterns rectangles
-        ColumnLayout {
-            anchors.leftMargin: 20
-            spacing: 10
 
-            Rectangle {
-                Layout.preferredHeight: 51
-                color: "darkgray"
-                ColumnLayout {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 10
-                    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                    Label {
-                        id: statusText
-                        text: qsTr("Status:")
-                        font.family: "Segoe UI"
-                    }
-                }
-            }
+        Label {
+            id: statusText
+            Layout.preferredHeight: 51
+            Layout.fillWidth: true
+            text: qsTr("Status:")
+            font.family: "Segoe UI"
+            verticalAlignment: "AlignVCenter"
+        }
 
-            Rectangle {
-                Layout.preferredHeight: 51
-                color: "darkgray"
-                ColumnLayout {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 10
-                    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                    Label {
-                        id: angleText
-                        text: qsTr("Angle:")
-                        font.family: "Segoe UI"
-                    }
-                }
-            }
+        Label {
+            id: angleText
+            text: qsTr("Angle:")
+            Layout.preferredHeight: 51
+            Layout.fillWidth: true
+            font.family: "Segoe UI"
+            verticalAlignment: "AlignVCenter"
+        }
 
-            Rectangle {
-                Layout.preferredHeight: 51
-                color: "darkgray"
-                ColumnLayout {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 10
-                    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                    Label {
-                        id: accelText
-                        text: qsTr("Accel:")
-                        font.family: "Segoe UI"
-                    }
-                }
-            }
+        Label {
+            id: accelText
+            text: qsTr("Accel:")
+            Layout.preferredHeight: 51
+            Layout.fillWidth: true
+            font.family: "Segoe UI"
+            verticalAlignment: "AlignVCenter"
+        }
 
-            Rectangle {
-                Layout.preferredHeight: 20
-                ColumnLayout {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 10
-                    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-                    Label {
-                        text: qsTr("Patterns:")
-                        font.family: "Segoe UI"
-                    }
-                }
-            }
+        Label {
+            id: patterns
+            text: qsTr("Patterns:")
+            Layout.preferredHeight: 51
+            Layout.fillWidth: true
+            font.family: "Segoe UI"
+            verticalAlignment: "AlignVCenter"
         }
 
         // TextArea in ScrollView
-               ScrollView {
-                   width: parent.width
-                   height: 200
-
-                   TextArea {
-                       id: outputArea
-                       anchors.fill: parent
-                       readOnly: true
-                       wrapMode: Text.Wrap
-                       text: "Output will be displayed here..."
-                   }
-               }
-
-
-        // Buttons
-        ColumnLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 10
-
-            Button {
-                id: calibration
-                text: qsTr("Calibration")
-                Layout.preferredHeight: 41
-                onClicked: {
-                    accelerometer.calibration();
-                }
+        ScrollView{
+            Layout.fillWidth: true
+            Layout.preferredHeight: 200
+            TextArea{
+                id: outputArea
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                font.pixelSize: 18
+                font.bold: true
+                readOnly: true
             }
+        }
 
-            Button {
-                id: startRecordingButton
-                text: qsTr("Start Recording")
-                Layout.preferredHeight: 41
-                onClicked: {
-                    if (text === "Start Recording") {
-                        text = "Stop Recording"
-                        accelerometer.start()
-                    } else {
-                        text = "Start Recording"
-                        accelerometer.stop()
-                    }
-                }
+
+        Button {
+            id: calibration
+            text: qsTr("Calibration")
+            Layout.fillWidth: true
+            Layout.preferredHeight: 41
+            onClicked: {
+                accelerometer.calibration();
             }
+        }
 
-            Button {
-                id: startAttemptButton
-                text: qsTr("Start Attempt")
-                Layout.preferredHeight: 41
-                onClicked: {
-                    text = text === "Start Attempt" ? "Stop Attempt" : "Start Attempt"
-                }
-            }
-
-            Button {
-                id: authenticateButton
-                text: qsTr("Authenticate")
-                Layout.preferredHeight: 41
-                onClicked: {
-                    // Add your authenticate function here
-                }
-            }
-
-            Button {
-                id: resetButton
-                text: qsTr("Reset")
-                Layout.preferredHeight: 41
-                onClicked: {
-                    // Add your reset function here
+        Button {
+            id: startRecordingButton
+            text: qsTr("Start Recording")
+            Layout.fillWidth: true
+            Layout.preferredHeight: 41
+            onClicked: {
+                if (text === "Start Recording") {
+                    text = "Stop Recording"
+                    accelerometer.start()
+                } else {
+                    text = "Start Recording"
+                    accelerometer.stop()
                 }
             }
         }
+
+        Button {
+            id: startAttemptButton
+            text: qsTr("Start Attempt")
+            Layout.fillWidth: true
+            Layout.preferredHeight: 41
+            onClicked: {
+                text = text === "Start Attempt" ? "Stop Attempt" : "Start Attempt"
+            }
+        }
+
+        Button {
+            id: authenticateButton
+            text: qsTr("Authenticate")
+            Layout.fillWidth: true
+            Layout.preferredHeight: 41
+            onClicked: {
+                // Add your authenticate function here
+            }
+        }
+
+        Button {
+            id: resetButton
+            text: qsTr("Reset")
+            Layout.fillWidth: true
+            Layout.preferredHeight: 41
+            onClicked: {
+                // Add your reset function here
+            }
+        }
     }
+
+    /*Component.onCompleted: {
+        for (let i = 1; i < 20; i++){
+            outputArea.text += `hello world ${i}\n`
+        }
+    }*/
 }
