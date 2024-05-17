@@ -55,7 +55,7 @@ void Gyroscope::onSensorReadingChanged()
         // Apply Kalman filter
         z = alphaKalman.update(z);
 
-        alpha += z * sampling_interval;
+        alpha += z * sampling_interval/1000;
         alpha = fmod(alpha, 360.0);
         QString output = QStringLiteral("Rotation (alpha): %1").arg(QString::number(alpha, 'f', 2));
         emit readingUpdated(output);
