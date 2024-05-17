@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "accelerometer.h"
+#include "gyroscope.h"
 #include "movementdatabase.h"
 
 int main(int argc, char *argv[])
@@ -9,7 +10,8 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<Accelerometer>("com.example", 1, 0, "Accelerometer");
-    qmlRegisterType<MovementDatabase>("com.example", 1, 0, "MovementDatabase"); // Register MovementDatabase
+    qmlRegisterType<Gyroscope>("com.example", 1, 0, "Gyroscope");
+    qmlRegisterType<MovementDatabase>("com.example", 1, 0, "MovementDatabase");
 
     QQmlApplicationEngine engine;
 

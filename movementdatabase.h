@@ -13,11 +13,14 @@ public:
     explicit MovementDatabase(QObject *parent = nullptr);
 
     Q_INVOKABLE void handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias);
+    Q_INVOKABLE void handleNewAngle(double alpha);
+    Q_INVOKABLE void reset();
 
     QList<Movement *> movements() const;
 
 signals:
     void movementsUpdated(qreal x_pos, qreal y_pos);
+    void angleUpdated(double alpha);
 
 private:
     Movement *currentMovement;

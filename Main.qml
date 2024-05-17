@@ -10,7 +10,6 @@ ApplicationWindow {
     title: qsTr("MainWindow")
 
     function addNewMovement(xValue, yValue) {
-
         // Append the new item to the model
         var formattedX = xValue.toFixed(2);
         var formattedY = yValue.toFixed(2);
@@ -26,17 +25,23 @@ ApplicationWindow {
         statusText.text = "Status: " + output;
     }
 
+    function updateGyroText(output) {
+        angleText.text = "Angle: " + output;
+    }
+
     Accelerometer {
         id: accelerometer
         onReadingUpdated: {
             updateAccelText(output)
-            // Assuming output contains the x and y values as strings separated by spaces
-            /*var values = output.split(" ");
-            //console.log(values);
-            movementDatabase.handleNewAcceleration(parseFloat(values[1]), parseFloat(values[4]), accelerometer.getXBias(), accelerometer.getYBias())*/
         }
         onNewAcceleration: movementDatabase.handleNewAcceleration(x, y, velocityX, velocityY, accelerometer.getXBias(), accelerometer.getYBias())
         onCalibrationFinished: updateStatusLabel(output)
+    }
+
+    Gyroscope {
+        id: gyroscope
+        onReadingUpdated: updateGyroText(output)
+        onNewRotation: updateGyroText(output)
     }
 
     MovementDatabase {
@@ -96,6 +101,7 @@ ApplicationWindow {
                 font.pixelSize: 18
                 font.bold: true
                 readOnly: true
+
             }
         }
 
@@ -107,6 +113,7 @@ ApplicationWindow {
             Layout.preferredHeight: 41
             onClicked: {
                 accelerometer.calibration();
+
             }
         }
 
@@ -153,6 +160,7 @@ ApplicationWindow {
             Layout.preferredHeight: 41
             onClicked: {
                 // Add your reset function here
+
             }
         }
     }

@@ -21,6 +21,10 @@ qt_add_qml_module(appQtQuickProject
     SOURCES movement.h movement.cpp
     SOURCES movementdatabase.h movementdatabase.cpp
     SOURCES
+    SOURCES
+    SOURCES
+    SOURCES gyroscope.h
+    SOURCES gyroscope.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
