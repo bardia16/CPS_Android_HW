@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #define min_distance 0.01
+
 MovementDatabase::MovementDatabase(QObject *parent)
     : QObject(parent), currentMovement(new Movement(this))
 {
@@ -11,13 +12,9 @@ MovementDatabase::MovementDatabase(QObject *parent)
 
 void MovementDatabase::handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias)
 {
-    /*qDebug() << "Velocities:";
-    qDebug() << velocityX;
-    qDebug() << velocityY;*/
     if (std::abs(x) < min_acceleration && std::abs(y) < min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance
         && (std::abs(velocityX) < min_velocity && std::abs(velocityY) < min_velocity))
     {
-        //qreal dist = currentMovement->calculateDistanceTraveled();
         createNewMovement();
         qDebug() << "Creating new movements";
     }
@@ -25,7 +22,21 @@ void MovementDatabase::handleNewAcceleration(double x, double y, double velocity
         currentMovement->addAcceleration(x, y);
     }
     qDebug() << m_movements;
+}
 
+void MovementDatabase::handleNewAngle(double alpha)
+{
+    currentMovement->addAngleChange(alpha);
+    emit angleUpdated(currentMovement->getCurrentAngle());
+}
+
+void MovementDatabase::reset()
+{
+    currentMovement = new Movement(this);
+    m_movements.clear();
+    m_movements.append(currentMovement);
+    emit movementsUpdated(0.0, 0.0);
+    qDebug() << "MovementDatabase reset.";
 }
 
 void MovementDatabase::createNewMovement()

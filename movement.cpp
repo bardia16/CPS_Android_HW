@@ -1,13 +1,22 @@
 #include "movement.h"
 #include <QDebug>
+
 Movement::Movement(QObject *parent)
-    : QObject(parent), sampleInterval(0.005) // assuming a sample interval of 0.25 seconds
+    : QObject(parent), sampleInterval(0.005), currentAngle(0.0) // assuming a sample interval of 0.25 seconds
 {
 }
 
 void Movement::addAcceleration(double x, double y)
 {
     accelerations.append(QVector3D(x, y, 0.0));
+}
+
+void Movement::addAngleChange(double alpha)
+{
+    currentAngle += alpha;
+    // Ensure the angle stays within the range of 0 to 360 degrees
+    if (currentAngle >= 360.0) currentAngle -= 360.0;
+    if (currentAngle < 0.0) currentAngle += 360.0;
 }
 
 qreal Movement::calculateDistanceTraveled() const
@@ -37,7 +46,6 @@ qreal Movement::calculateDistanceTraveled() const
     qDebug() << totalDistance;
     return totalDistance;
 }
-
 
 void Movement::setStartPosition(qreal x, qreal y)
 {
@@ -97,4 +105,9 @@ QVector3D Movement::getCurrentPosition() const
     qDebug() << "New starting position:";
     qDebug() << currentPosition;
     return currentPosition;
+}
+
+double Movement::getCurrentAngle() const
+{
+    return currentAngle;
 }

@@ -15,16 +15,19 @@ public:
     explicit Movement(QObject *parent = nullptr);
 
     void addAcceleration(double x, double y);
+    void addAngleChange(double alpha);
     qreal calculateDistanceTraveled() const;
     qreal calculateDistanceTraveledX() const;
     qreal calculateDistanceTraveledY() const;
     QVector<QVector3D> accelerations;
     void setStartPosition(qreal x, qreal y);
     QVector3D getCurrentPosition() const;
+    double getCurrentAngle() const;
 
 private:
     QVector3D startPosition;
     qreal sampleInterval;
+    double currentAngle;
 };
 
 #endif // MOVEMENT_H

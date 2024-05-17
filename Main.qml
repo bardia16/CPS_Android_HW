@@ -10,7 +10,6 @@ ApplicationWindow {
     title: qsTr("MainWindow")
 
     function addNewMovement(xValue, yValue) {
-
         // Append the new item to the model
         outputArea.append("X: "+ xValue + "  Y: " + yValue + "\n");
     }
@@ -23,17 +22,23 @@ ApplicationWindow {
         statusText.text = "Status: " + output;
     }
 
+    function updateGyroText(output) {
+        angleText.text = "Angle: " + output;
+    }
+
     Accelerometer {
         id: accelerometer
         onReadingUpdated: {
             updateAccelText(output)
-            // Assuming output contains the x and y values as strings separated by spaces
-            /*var values = output.split(" ");
-            //console.log(values);
-            movementDatabase.handleNewAcceleration(parseFloat(values[1]), parseFloat(values[4]), accelerometer.getXBias(), accelerometer.getYBias())*/
         }
         onNewAcceleration: movementDatabase.handleNewAcceleration(x, y, velocityX, velocityY, accelerometer.getXBias(), accelerometer.getYBias())
         onCalibrationFinished: updateStatusLabel(output)
+    }
+
+    Gyroscope {
+        id: gyroscope
+        onReadingUpdated: updateGyroText(output)
+        onNewRotation: updateGyroText(output)
     }
 
     MovementDatabase {
@@ -110,19 +115,18 @@ ApplicationWindow {
         }
 
         // TextArea in ScrollView
-               ScrollView {
-                   width: parent.width
-                   height: 200
+        ScrollView {
+            width: parent.width
+            height: 200
 
-                   TextArea {
-                       id: outputArea
-                       anchors.fill: parent
-                       readOnly: true
-                       wrapMode: Text.Wrap
-                       text: "Output will be displayed here..."
-                   }
-               }
-
+            TextArea {
+                id: outputArea
+                anchors.fill: parent
+                readOnly: true
+                wrapMode: Text.Wrap
+                text: "Output will be displayed here..."
+            }
+        }
 
         // Buttons
         ColumnLayout {
@@ -146,9 +150,11 @@ ApplicationWindow {
                     if (text === "Start Recording") {
                         text = "Stop Recording"
                         accelerometer.start()
+                        gyroscope.start()
                     } else {
                         text = "Start Recording"
                         accelerometer.stop()
+                        gyroscope.stop()
                     }
                 }
             }
@@ -176,7 +182,9 @@ ApplicationWindow {
                 text: qsTr("Reset")
                 Layout.preferredHeight: 41
                 onClicked: {
-                    // Add your reset function here
+                    gyroscope.reset()
+                    movementDatabase.reset()
+                    outputArea.text = "Output will be displayed here..."
                 }
             }
         }
