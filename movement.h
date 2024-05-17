@@ -5,8 +5,8 @@
 #include <QVector>
 #include <QVector3D>
 
-#define min_acceleration 0.04
-#define min_velocity 0.1
+#define min_acceleration 0
+#define min_velocity 0
 
 class Movement : public QObject
 {

@@ -8,7 +8,7 @@
 #include <QVector2D>
 
 
-#define frictional_accel 0.15
+#define frictional_accel 0.5
 #define accel_threshold 0.5
 #define calibrationDuration 1000 // 1sec
 #define sampling_interval 5 // 5ms = 0.005sec

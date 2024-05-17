@@ -12,8 +12,10 @@ ApplicationWindow {
     function addNewMovement(xValue, yValue) {
 
         // Append the new item to the model
-        newLine = "X: "+ xValue + "  Y: " + yValue + "\n";
-        outputArea.text = outputArea.text + newLine;
+        var formattedX = xValue.toFixed(2);
+        var formattedY = yValue.toFixed(2);
+
+        outputArea.text += "X: "+ formattedX + "  Y: " + formattedY + "\n";
     }
 
     function updateAccelText(output) {
@@ -155,9 +157,9 @@ ApplicationWindow {
         }
     }
 
-    Component.onCompleted: {
+    /*Component.onCompleted: {
         for (let i = 1; i < 20; i++){
             outputArea.text += `hello world ${i}\n`
         }
-    }
+    }*/
 }
