@@ -2,7 +2,7 @@
 #include <QDebug>
 
 Movement::Movement(QObject *parent)
-    : QObject(parent), sampleInterval(0.005), currentAngle(0.0) // assuming a sample interval of 0.25 seconds
+    : QObject(parent), sampleInterval(0.005), currentAngle(0.0) // assuming a sample interval of 0.005 seconds
 {
 }
 
@@ -13,10 +13,8 @@ void Movement::addAcceleration(double x, double y)
 
 void Movement::addAngleChange(double alpha)
 {
+    angleChanges.append(alpha);
     currentAngle = alpha;
-    // Ensure the angle stays within the range of 0 to 360 degrees
-    //if (currentAngle >= 360.0) currentAngle -= 360.0;
-    //if (currentAngle < 0.0) currentAngle += 360.0;
 }
 
 qreal Movement::calculateDistanceTraveled() const
@@ -33,13 +31,11 @@ qreal Movement::calculateDistanceTraveled() const
         qreal averageVelocityX = (previousVelocityX + velocityX) / 2;
         qreal averageVelocityY = (previousVelocityY + velocityY) / 2;
 
-        // Calculate the distance traveled in this sample interval
         qreal distanceX = averageVelocityX * sampleInterval;
         qreal distanceY = averageVelocityY * sampleInterval;
 
         totalDistance += std::sqrt(distanceX * distanceX + distanceY * distanceY);
 
-        // Update previous velocities for the next iteration
         previousVelocityX = velocityX;
         previousVelocityY = velocityY;
     }
@@ -67,12 +63,10 @@ qreal Movement::calculateDistanceTraveledX() const
 
         qreal averageVelocityX = (previousVelocityX + velocityX) / 2;
 
-        // Calculate the distance traveled in this sample interval
         qreal distanceX = averageVelocityX * sampleInterval;
 
         totalDistance += distanceX;
 
-        // Update previous velocities for the next iteration
         previousVelocityX = velocityX;
     }
     return totalDistance;
@@ -88,12 +82,10 @@ qreal Movement::calculateDistanceTraveledY() const
 
         qreal averageVelocityY = (previousVelocityY + velocityY) / 2;
 
-        // Calculate the distance traveled in this sample interval
         qreal distanceY = averageVelocityY * sampleInterval;
 
         totalDistance += distanceY;
 
-        // Update previous velocities for the next iteration
         previousVelocityY = velocityY;
     }
     return totalDistance;

@@ -11,9 +11,6 @@ MovementDatabase::MovementDatabase(QObject *parent)
 
 void MovementDatabase::handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias)
 {
-    /*qDebug() << "Velocities:";
-    qDebug() << velocityX;
-    qDebug() << velocityY;*/
     if (std::abs(x) <= min_acceleration && std::abs(y) <= min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance
         && (std::abs(velocityX) <= min_velocity && std::abs(velocityY) <= min_velocity))
     {
@@ -57,8 +54,6 @@ void MovementDatabase::createNewMovement()
         newMovement->setStartAngle(lastAngle);
     }
     emit movementsUpdated(lastPosition.x(), lastPosition.y(), lastAngle);
-    //qDebug() << "New update to positions";
-    //qDebug() << lastPosition.y();
     m_movements.append(newMovement);
     currentMovement = newMovement;
 }

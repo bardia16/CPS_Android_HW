@@ -1,5 +1,5 @@
 import QtQuick 2.15
-import QtQuick.Controls.Material 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import com.example 1.0
 
@@ -9,40 +9,58 @@ ApplicationWindow {
     height: 800
     title: qsTr("MainWindow")
 
+    // Variables to store calibration messages and completion flags
+    property string gyroCalibrationMessage: ""
+    property string accelCalibrationMessage: ""
+    property bool gyroCalibrated: false
+    property bool accelCalibrated: false
+
     function addNewMovement(xValue, yValue, angle) {
-        // Append the new item to the model
         var formattedX = xValue.toFixed(2);
         var formattedY = yValue.toFixed(2);
         var formattedAngle = angle.toFixed(2);
 
-        outputArea.text += "Position: " + "X: "+ formattedX + "  Y: " + formattedY + "  Angle: "+ formattedAngle + "\n";
+        outputArea.text += "Position: X: " + formattedX + "  Y: " + formattedY + "  Angle: " + formattedAngle + "\n";
     }
 
     function updateAccelText(output) {
         accelText.text = "Accel: " + output;
     }
 
-    function updateStatusLabel(output) {
-        statusText.text = "Status: " + output;
-    }
-
     function updateGyroText(output) {
         angleText.text = "Angle: " + output;
     }
 
+    function updateStatusLabel(output) {
+        statusText.text = "Status: " + output;
+    }
+
+    function checkCalibrationCompletion() {
+        if (gyroCalibrated && accelCalibrated) {
+            updateStatusLabel(gyroCalibrationMessage + "\n" + accelCalibrationMessage);
+        }
+    }
+
     Accelerometer {
         id: accelerometer
-        onReadingUpdated: {
-            updateAccelText(output)
-        }
+        onReadingUpdated: updateAccelText(output)
         onNewAcceleration: movementDatabase.handleNewAcceleration(x, y, velocityX, velocityY, accelerometer.getXBias(), accelerometer.getYBias())
-        onCalibrationFinished: updateStatusLabel(output)
+        onCalibrationFinished: {
+            accelCalibrationMessage = "Accelerometer: " + output;
+            accelCalibrated = true;
+            checkCalibrationCompletion();
+        }
     }
 
     Gyroscope {
         id: gyroscope
         onReadingUpdated: updateGyroText(output)
         onNewRotation: movementDatabase.handleNewAngle(alpha)
+        onCalibrationFinished: {
+            gyroCalibrationMessage = "Gyroscope: " + output;
+            gyroCalibrated = true;
+            checkCalibrationCompletion();
+        }
     }
 
     MovementDatabase {
@@ -54,7 +72,6 @@ ApplicationWindow {
         anchors.fill: parent
         anchors.margins: 20
         spacing: 10
-
 
         Label {
             id: statusText
@@ -92,20 +109,17 @@ ApplicationWindow {
             verticalAlignment: "AlignVCenter"
         }
 
-        // TextArea in ScrollView
-        ScrollView{
+        ScrollView {
             Layout.fillWidth: true
             Layout.preferredHeight: 200
-            TextArea{
+            TextArea {
                 id: outputArea
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 font.pixelSize: 18
                 font.bold: true
                 readOnly: true
-
             }
         }
-
 
         Button {
             id: calibration
@@ -113,8 +127,14 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.preferredHeight: 41
             onClicked: {
-                accelerometer.calibration();
+                // Reset calibration status
+                gyroCalibrated = false;
+                accelCalibrated = false;
+                gyroCalibrationMessage = "";
+                accelCalibrationMessage = "";
 
+                gyroscope.calibration();
+                accelerometer.calibration();
             }
         }
 
@@ -162,15 +182,11 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.preferredHeight: 41
             onClicked: {
-                // Add your reset function here
+                movementDatabase.reset();
+                gyroscope.reset();
+                // accelerometer.reset();
 
             }
         }
     }
-
-    /*Component.onCompleted: {
-        for (let i = 1; i < 20; i++){
-            outputArea.text += `hello world ${i}\n`
-        }
-    }*/
 }

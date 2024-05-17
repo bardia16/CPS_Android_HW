@@ -29,6 +29,7 @@ private:
     QVector3D startPosition;
     qreal sampleInterval;
     double currentAngle;
+    QVector<double> angleChanges; // Store angle changes
 };
 
 #endif // MOVEMENT_H

@@ -1,13 +1,14 @@
 #include "gyroscope.h"
 #include <QDebug>
-#include <math.h>
 
 Gyroscope::Gyroscope(QObject *parent)
-    : QObject(parent), alpha(0.0), alphaKalman(0.1, 1, 0.1, 0.0)
+    : QObject(parent), z_bias(0.0), currentAngle(0.0), angleKalman(0.1, 1, 0.1, 0.0) // Initialize Kalman filter
 {
     sensor = new QGyroscope(this);
     timer = new QTimer(this);
+    calibrationTimer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Gyroscope::onSensorReadingChanged);
+    connect(calibrationTimer, &QTimer::timeout, this, &Gyroscope::onCalibrationFinished);
 }
 
 Gyroscope::~Gyroscope()
@@ -33,16 +34,50 @@ void Gyroscope::stop()
     {
         sensor->stop();
         timer->stop();
+        calibrationTimer->stop();
         emit activeChanged();
         qDebug() << "Gyroscope stopped.";
     }
 }
 
-void Gyroscope::reset()
+void Gyroscope::calibration()
 {
-    alpha = 0.0;
-    emit gyroscopeReset();
-    qDebug() << "Gyroscope reset.";
+    sensor->start();
+    z_values.clear();
+    calibrationTimer->start(calibrationDuration);
+    connect(sensor, &QGyroscope::readingChanged, this, &Gyroscope::onCalibrationReadingChanged);
+}
+
+void Gyroscope::onCalibrationReadingChanged()
+{
+    QGyroscopeReading *reading = sensor->reading();
+    if (reading)
+    {
+        z_values.append(reading->z());
+    }
+    else
+    {
+        qDebug() << "No reading available.";
+    }
+}
+
+void Gyroscope::onCalibrationFinished()
+{
+    sensor->stop();
+    calibrationTimer->stop();
+    disconnect(sensor, &QGyroscope::readingChanged, this, &Gyroscope::onCalibrationReadingChanged);
+
+    double z_sum = 0.0;
+    for (double z : z_values)
+        z_sum += z;
+
+    z_bias = z_sum / z_values.size();
+
+    QString output = QStringLiteral("Calibration complete\tZ bias: %1")
+                         .arg(QString::number(z_bias, 'f', 1));
+    qDebug() << "Bias: " + output;
+
+    emit calibrationFinished(output);
 }
 
 void Gyroscope::onSensorReadingChanged()
@@ -50,20 +85,53 @@ void Gyroscope::onSensorReadingChanged()
     QGyroscopeReading *reading = sensor->reading();
     if (reading)
     {
-        double z = reading->z(); // Rotation around the Z axis
+        double alpha = reading->z();
 
         // Apply Kalman filter
-        z = alphaKalman.update(z);
+        alpha = angleKalman.update(alpha);
 
-        alpha += z * sampling_interval/1000;
-        alpha = fmod(alpha, 360.0);
-        QString output = QStringLiteral("Rotation (alpha): %1").arg(QString::number(alpha, 'f', 2));
+        // Adjust for bias
+        alpha -= z_bias;
+
+        // Apply threshold
+        if (std::abs(alpha) < gyro_threshold)
+            alpha = 0.0;
+
+        double angleChange = alpha * 0.01;
+        currentAngle += angleChange;
+
+
+        if (currentAngle >= 360.0) currentAngle -= 360.0;
+        if (currentAngle < 0.0) currentAngle += 360.0;
+
+        // Normalize the angle change
+        double normalizedAngle = 0.0;
+        if (currentAngle >= 60.0 && currentAngle < 135.0) {
+            normalizedAngle = 90.0;
+        } else if (currentAngle >= 135.0 && currentAngle < 225.0) {
+            normalizedAngle = 180.0;
+        } else if (currentAngle >= 225.0 && currentAngle < 315.0) {
+            normalizedAngle = -90.0;
+        } else {
+            normalizedAngle = 0.0;
+        }
+
+        QString output = QStringLiteral("Alpha: %1").arg(QString::number(normalizedAngle, 'f', 2));
+
         emit readingUpdated(output);
-        emit newRotation(alpha);
-        qDebug() << output;
+        emit newRotation(normalizedAngle);
+
     }
     else
     {
         qDebug() << "No reading available.";
     }
+}
+
+void Gyroscope::reset()
+{
+    z_bias = 0.0;
+    currentAngle = 0.0;
+    angleKalman.reset(0.0);
+    qDebug() << "Gyroscope reset.";
 }

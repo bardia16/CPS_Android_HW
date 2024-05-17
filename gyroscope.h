@@ -5,7 +5,9 @@
 #include <QtSensors/QGyroscope>
 #include <QTimer>
 
-#define sampling_interval 5 // 5ms = 0.005sec
+#define calibrationDuration 1000 // 1 second
+#define sampling_interval 10 // 10 ms
+#define gyro_threshold 0.5 // Threshold for gyro noise
 
 class GyroscopeKalmanFilter
 {
@@ -26,6 +28,12 @@ public:
         return x;
     }
 
+    void reset(double initialValue)
+    {
+        p = q;
+        x = initialValue;
+    }
+
 private:
     double q; // Process noise covariance
     double r; // Measurement noise covariance
@@ -44,25 +52,32 @@ public:
 
     bool isActive() const { return sensor->isActive(); }
 
+    Q_INVOKABLE void calibration();
+    Q_INVOKABLE void reset();
+
 public slots:
     void start();
     void stop();
-    void reset();
 
 signals:
     void readingUpdated(const QString &output);
     void activeChanged();
+    void calibrationFinished(const QString &output);
     void newRotation(double alpha);
-    void gyroscopeReset();
 
 private slots:
     void onSensorReadingChanged();
+    void onCalibrationReadingChanged();
+    void onCalibrationFinished();
 
 private:
     QGyroscope *sensor;
     QTimer *timer;
-    double alpha; // Rotation around the Z axis
-    GyroscopeKalmanFilter alphaKalman; // Kalman filter for the Z axis
+    QTimer *calibrationTimer;
+    QVector<double> z_values;
+    double z_bias;
+    double currentAngle;
+    GyroscopeKalmanFilter angleKalman;
 };
 
 #endif // GYROSCOPE_H
