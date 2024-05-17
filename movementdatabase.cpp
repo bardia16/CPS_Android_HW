@@ -11,9 +11,9 @@ MovementDatabase::MovementDatabase(QObject *parent)
 
 void MovementDatabase::handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias)
 {
-    qDebug() << "Velocities:";
+    /*qDebug() << "Velocities:";
     qDebug() << velocityX;
-    qDebug() << velocityY;
+    qDebug() << velocityY;*/
     if (std::abs(x) < min_acceleration && std::abs(y) < min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance
         && (std::abs(velocityX) < min_velocity && std::abs(velocityY) < min_velocity))
     {
@@ -35,10 +35,10 @@ void MovementDatabase::createNewMovement()
     if (!m_movements.isEmpty()) {
         QVector3D lastPosition = m_movements.last()->getCurrentPosition();
         newMovement->setStartPosition(lastPosition.x(), lastPosition.y());
+        emit movementsUpdated(lastPosition.x(), lastPosition.y());
     }
     m_movements.append(newMovement);
     currentMovement = newMovement;
-    emit movementsUpdated();
 }
 
 QList<Movement *> MovementDatabase::movements() const

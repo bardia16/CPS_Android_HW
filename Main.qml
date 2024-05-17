@@ -9,6 +9,12 @@ ApplicationWindow {
     height: 800
     title: qsTr("MainWindow")
 
+    function addNewMovement(xValue, yValue) {
+
+        // Append the new item to the model
+        outputArea.append("X: "+ xValue + "  Y: " + yValue + "\n");
+    }
+
     function updateAccelText(output) {
         accelText.text = "Accel: " + output;
     }
@@ -32,6 +38,7 @@ ApplicationWindow {
 
     MovementDatabase {
         id: movementDatabase
+        onMovementsUpdated: addNewMovement(x_pos, y_pos);
     }
 
     ColumnLayout {
@@ -102,29 +109,20 @@ ApplicationWindow {
             }
         }
 
-        // ListView
-        ListView {
-            id: listView
-            Layout.preferredHeight: 341
-            model: ListModel {
-                ListElement { name: "Pattern 1" }
-                ListElement { name: "Pattern 2" }
-            }
-            delegate: Item {
-                width: listView.width
-                height: 40
-                Rectangle {
-                    width: parent.width
-                    height: parent.height
-                    color: "darkgray"
-                    Text {
-                        anchors.centerIn: parent
-                        text: model.name
-                        color: "white"
-                    }
-                }
-            }
-        }
+        // TextArea in ScrollView
+               ScrollView {
+                   width: parent.width
+                   height: 200
+
+                   TextArea {
+                       id: outputArea
+                       anchors.fill: parent
+                       readOnly: true
+                       wrapMode: Text.Wrap
+                       text: "Output will be displayed here..."
+                   }
+               }
+
 
         // Buttons
         ColumnLayout {
