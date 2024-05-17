@@ -6,8 +6,8 @@
 #include <QTimer>
 
 #define calibrationDuration 1000 // 1 second
-#define sampling_interval 5 // 5 ms
-#define gyro_threshold 0.05 // Threshold for gyro noise
+#define sampling_interval 10 // 10 ms
+#define gyro_threshold 0.5 // Threshold for gyro noise
 
 class GyroscopeKalmanFilter
 {

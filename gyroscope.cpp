@@ -97,14 +97,29 @@ void Gyroscope::onSensorReadingChanged()
         if (std::abs(alpha) < gyro_threshold)
             alpha = 0.0;
 
-        currentAngle += alpha * sampling_interval / 1000.0 * 2; // Assuming sampling interval is 5ms
+        double angleChange = alpha * 0.01;
+        currentAngle += angleChange;
+
+
         if (currentAngle >= 360.0) currentAngle -= 360.0;
         if (currentAngle < 0.0) currentAngle += 360.0;
 
-        QString output = QStringLiteral("Alpha: %1").arg(QString::number(currentAngle, 'f', 2));
+        // Normalize the angle change
+        double normalizedAngle = 0.0;
+        if (currentAngle >= 60.0 && currentAngle < 135.0) {
+            normalizedAngle = 90.0;
+        } else if (currentAngle >= 135.0 && currentAngle < 225.0) {
+            normalizedAngle = 180.0;
+        } else if (currentAngle >= 225.0 && currentAngle < 315.0) {
+            normalizedAngle = -90.0;
+        } else {
+            normalizedAngle = 0.0;
+        }
+
+        QString output = QStringLiteral("Alpha: %1").arg(QString::number(normalizedAngle, 'f', 2));
         emit readingUpdated(output);
-        emit newRotation(currentAngle);
-        qDebug() << output;
+        emit newRotation(normalizedAngle);
+
     }
     else
     {
