@@ -185,7 +185,6 @@ ApplicationWindow {
                 movementDatabase.reset();
                 gyroscope.reset();
                 // accelerometer.reset();
-
             }
         }
     }
