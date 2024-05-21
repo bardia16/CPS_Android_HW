@@ -34,7 +34,7 @@ void MovementDatabase::reset()
     currentMovement = new Movement(this);
     m_movements.clear();
     m_movements.append(currentMovement);
-    emit movementsUpdated(0.0, 0.0, 0.0, "Reset");
+    //emit movementsUpdated(0.0, 0.0, 0.0, "Reset");
     qDebug() << "MovementDatabase reset.";
 }
 
@@ -118,7 +118,16 @@ QString MovementDatabase::getDirection()
     return direction;
 }
 
-QList<Movement *> MovementDatabase::movements() const
+void MovementDatabase::createNewPattern(bool isAttempt)
 {
-    return m_movements;
+    // Create a new Pattern instance with the current list of movements
+    Pattern* pattern = new Pattern(m_movements, this);
+
+    if(!isAttempt)
+        emit newPattern(pattern);
+    else
+        emit newAttempt(pattern);
+
+    // Optionally, clear the current list of movements if needed
+    reset();
 }

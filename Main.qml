@@ -64,9 +64,16 @@ ApplicationWindow {
         }
     }
 
+    PatternDatabase {
+        id: patternDatabase
+        onAuthenticationResult: updateStatusLabel(output)
+    }
+
     MovementDatabase {
         id: movementDatabase
         onMovementsUpdated: addNewMovement(x_pos, y_pos, angle, direction);
+        onNewPattern: patternDatabase.addPattern(pattern)
+        onNewAttempt: patternDatabase.authenticatePattern(pattern)
     }
 
     ColumnLayout {
@@ -153,6 +160,7 @@ ApplicationWindow {
                     text = "Start Recording"
                     accelerometer.stop()
                     gyroscope.stop()
+                    movementDatabase.createNewPattern(false)
                 }
             }
         }
@@ -163,7 +171,16 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.preferredHeight: 41
             onClicked: {
-                text = text === "Start Attempt" ? "Stop Attempt" : "Start Attempt"
+                if (text === "Start Attempt") {
+                    text = "Stop Attempt"
+                    accelerometer.start()
+                    gyroscope.start()
+                } else {
+                    text = "Start Attempt"
+                    accelerometer.stop()
+                    gyroscope.stop()
+                    movementDatabase.createNewPattern(true)
+                }
             }
         }
 

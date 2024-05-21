@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include "movement.h"
+#include "pattern.h"
 
 class MovementDatabase : public QObject
 {
@@ -16,12 +17,17 @@ public:
     Q_INVOKABLE void handleNewAngle(double alpha);
     Q_INVOKABLE void reset();
 
-    QList<Movement *> movements() const;
+
     QString getDirection();
+
+public slots:
+    void createNewPattern(bool isAttempt);
 
 signals:
     void movementsUpdated(qreal x_pos, qreal y_pos, qreal angle, QString direction);
     void angleUpdated(double alpha);
+    void newPattern(Pattern *pattern);
+    void newAttempt(Pattern *pattern);
 
 private:
     Movement *currentMovement;
