@@ -116,7 +116,7 @@ ApplicationWindow {
             TextArea {
                 id: outputArea
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                font.pixelSize: 18
+                font.pixelSize: 14
                 font.bold: true
                 readOnly: true
             }
