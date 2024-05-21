@@ -21,6 +21,7 @@ void Gyroscope::start()
 {
     if (!sensor->isActive())
     {
+        currentAngle = 0.0; // reset it
         sensor->start();
         timer->start(gyro_sampling_interval);
         emit activeChanged();
@@ -130,8 +131,8 @@ void Gyroscope::onSensorReadingChanged()
 
 void Gyroscope::reset()
 {
-    z_bias = 0.0;
+    //z_bias = 0.0;
     currentAngle = 0.0;
-    angleKalman.reset(0.0);
+    //angleKalman.reset(0.0);
     qDebug() << "Gyroscope reset.";
 }

@@ -119,11 +119,11 @@ ApplicationWindow {
 
         ScrollView {
             Layout.fillWidth: true
-            Layout.preferredHeight: 200
+            Layout.preferredHeight: 300
             TextArea {
                 id: outputArea
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                font.pixelSize: 14
+                font.pixelSize: 12
                 font.bold: true
                 readOnly: true
             }
@@ -184,7 +184,7 @@ ApplicationWindow {
             }
         }
 
-        Button {
+        /*Button {
             id: authenticateButton
             text: qsTr("Authenticate")
             Layout.fillWidth: true
@@ -192,7 +192,7 @@ ApplicationWindow {
             onClicked: {
                 // Add your authenticate function here
             }
-        }
+        }*/
 
         Button {
             id: resetButton
