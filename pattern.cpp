@@ -12,12 +12,13 @@ bool Pattern::authenticate(Pattern *other) const
         return false;
 
     for (int i = 0; i < m_movements.size(); ++i) {
-        const Movement* m1 = m_movements[i];
-        const Movement* m2 = other->m_movements[i];
+        Movement* m1 = m_movements[i];
+        Movement* m2 = other->m_movements[i];
 
         if (std::abs(m1->getCurrentAngle() - m2->getCurrentAngle()) > 0.0)
             return false;
-
+        if (m1->getDirection() != m2->getDirection())
+            return false;
         QVector3D pos1 = m1->getCurrentPosition();
         QVector3D pos2 = m2->getCurrentPosition();
 

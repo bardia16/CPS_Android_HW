@@ -43,22 +43,24 @@ void MovementDatabase::createNewMovement()
     QVector3D lastPosition;
     qreal lastAngle;
     Movement* newMovement = new Movement(this);
+    Movement* lastMovement = m_movements.last();
     newMovement->setStartPosition(0.0, 0.0);
     newMovement->setStartAngle(0.0);
     lastPosition = QVector3D(0.0, 0.0, 0.0);
     lastAngle = 0.0;
     if (!m_movements.isEmpty()) {
-        lastPosition = m_movements.last()->getCurrentPosition();
-        lastAngle = m_movements.last()->getCurrentAngle();
+        lastMovement->findDirection();
+        lastPosition = lastMovement->getCurrentPosition();
+        lastAngle = lastMovement->getCurrentAngle();
         newMovement->setStartPosition(lastPosition.x(), lastPosition.y());
         newMovement->setStartAngle(lastAngle);
     }
-    emit movementsUpdated(lastPosition.x(), lastPosition.y(), lastAngle, getDirection());
+    emit movementsUpdated(lastPosition.x(), lastPosition.y(), lastAngle, lastMovement->getDirection());
     m_movements.append(newMovement);
     currentMovement = newMovement;
 }
 
-QString MovementDatabase::getDirection()
+/*QString MovementDatabase::getDirection()
 {
     qreal distanceX = currentMovement->calculateDistanceTraveledX();
     qreal distanceY = currentMovement->calculateDistanceTraveledY();
@@ -116,7 +118,7 @@ QString MovementDatabase::getDirection()
 
 
     return direction;
-}
+}*/
 
 void MovementDatabase::createNewPattern(bool isAttempt)
 {

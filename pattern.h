@@ -15,7 +15,7 @@ public:
 
 private:
     QList<Movement*> m_movements;
-    static constexpr double LOCATION_THRESHOLD = 0.1;
+    static constexpr double LOCATION_THRESHOLD = 0.5;
 };
 
 #endif // PATTERN_H

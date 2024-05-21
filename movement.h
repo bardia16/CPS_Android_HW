@@ -24,11 +24,14 @@ public:
     void setStartAngle(qreal angle);
     QVector3D getCurrentPosition() const;
     double getCurrentAngle() const;
+    QString getDirection();
+    void findDirection();
 
 private:
     QVector3D startPosition;
     qreal sampleInterval;
     double currentAngle;
+    QString currentDirection;
     QVector<double> angleChanges; // Store angle changes
 };
 

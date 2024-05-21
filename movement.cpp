@@ -2,7 +2,7 @@
 #include <QDebug>
 
 Movement::Movement(QObject *parent)
-    : QObject(parent), sampleInterval(0.05), currentAngle(0.0) // assuming a sample interval of 0.05 seconds
+    : QObject(parent), sampleInterval(0.01), currentAngle(0.0) // assuming a sample interval of 0.05 seconds
 {
 }
 
@@ -126,4 +126,68 @@ QVector3D Movement::getCurrentPosition() const
 double Movement::getCurrentAngle() const
 {
     return currentAngle;
+}
+
+void Movement::findDirection()
+{
+    qreal distanceX = calculateDistanceTraveledX();
+    qreal distanceY = calculateDistanceTraveledY();
+    bool main_direction_is_X = std::abs(distanceX) > std::abs(distanceY);
+    qreal angle = getCurrentAngle();
+    QString direction = "Not assigned";
+    //logic
+
+    if(main_direction_is_X && distanceX > 0)
+    {
+        if(angle == 0)
+            direction = "Right";
+        else if(angle == 90)
+            direction = "Up";
+        else if(angle == -90)
+            direction = "Bottom";
+        else if(angle == 180)
+            direction = "Left";
+    }
+    else if(main_direction_is_X && distanceX < 0)
+    {
+        if(angle == 0)
+            direction = "Left";
+        else if(angle == 90)
+            direction = "Bottom";
+        else if(angle == -90)
+            direction = "Up";
+        else if(angle == 180)
+            direction = "Right";
+    }
+    if(!main_direction_is_X && distanceY > 0)
+    {
+        if(angle == 0)
+            direction = "Up";
+        else if(angle == 90)
+            direction = "Left";
+        else if(angle == -90)
+            direction = "Right";
+        else if(angle == 180)
+            direction = "Down";
+    }
+    else if(!main_direction_is_X && distanceY < 0)
+    {
+        if(angle == 0)
+            direction = "Down";
+        else if(angle == 90)
+            direction = "Right";
+        else if(angle == -90)
+            direction = "Left";
+        else if(angle == 180)
+            direction = "Up";
+    }
+
+
+
+    currentDirection = direction;
+}
+
+QString Movement::getDirection()
+{
+    return currentDirection;
 }
