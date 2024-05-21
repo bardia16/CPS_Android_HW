@@ -11,7 +11,7 @@
 #define frictional_accel 0.5
 #define accel_threshold 0.5
 #define calibrationDuration 1000 // 1sec
-#define sampling_interval 50 // 50ms = 0.05sec
+#define accel_sampling_interval 50 // 50ms = 0.05sec
 
 class KalmanFilter
 {

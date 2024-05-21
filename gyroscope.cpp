@@ -22,7 +22,7 @@ void Gyroscope::start()
     if (!sensor->isActive())
     {
         sensor->start();
-        timer->start(sampling_interval);
+        timer->start(gyro_sampling_interval);
         emit activeChanged();
         qDebug() << "Gyroscope started.";
     }

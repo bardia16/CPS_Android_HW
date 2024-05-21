@@ -15,12 +15,13 @@ ApplicationWindow {
     property bool gyroCalibrated: false
     property bool accelCalibrated: false
 
-    function addNewMovement(xValue, yValue, angle) {
+    function addNewMovement(xValue, yValue, angle, direction) {
         var formattedX = xValue.toFixed(2);
         var formattedY = yValue.toFixed(2);
         var formattedAngle = angle.toFixed(2);
 
-        outputArea.text += "Position: X: " + formattedX + "  Y: " + formattedY + "  Angle: " + formattedAngle + "\n";
+        outputArea.text += "Position: X: " + formattedX + " Y: " + formattedY + " Angle: " +
+                formattedAngle + " Direction: " + direction + "\n";
     }
 
     function updateAccelText(output) {
@@ -65,7 +66,7 @@ ApplicationWindow {
 
     MovementDatabase {
         id: movementDatabase
-        onMovementsUpdated: addNewMovement(x_pos, y_pos, angle);
+        onMovementsUpdated: addNewMovement(x_pos, y_pos, angle, direction);
     }
 
     ColumnLayout {

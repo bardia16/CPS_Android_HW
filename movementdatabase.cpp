@@ -34,7 +34,7 @@ void MovementDatabase::reset()
     currentMovement = new Movement(this);
     m_movements.clear();
     m_movements.append(currentMovement);
-    emit movementsUpdated(0.0, 0.0, 0.0);
+    emit movementsUpdated(0.0, 0.0, 0.0, "Reset");
     qDebug() << "MovementDatabase reset.";
 }
 
@@ -53,9 +53,69 @@ void MovementDatabase::createNewMovement()
         newMovement->setStartPosition(lastPosition.x(), lastPosition.y());
         newMovement->setStartAngle(lastAngle);
     }
-    emit movementsUpdated(lastPosition.x(), lastPosition.y(), lastAngle);
+    emit movementsUpdated(lastPosition.x(), lastPosition.y(), lastAngle, getDirection());
     m_movements.append(newMovement);
     currentMovement = newMovement;
+}
+
+QString MovementDatabase::getDirection()
+{
+    qreal distanceX = currentMovement->calculateDistanceTraveledX();
+    qreal distanceY = currentMovement->calculateDistanceTraveledY();
+    bool main_direction_is_X = std::abs(distanceX) > std::abs(distanceY);
+    qreal angle = currentMovement->getCurrentAngle();
+    QString direction = "Not assigned";
+    //logic
+
+    if(main_direction_is_X && distanceX > 0)
+    {
+        if(angle == 0)
+            direction = "Right";
+        else if(angle == 90)
+            direction = "Up";
+        else if(angle == -90)
+            direction = "Bottom";
+        else if(angle == 180)
+            direction = "Left";
+    }
+    else if(main_direction_is_X && distanceX < 0)
+    {
+        if(angle == 0)
+            direction = "Left";
+        else if(angle == 90)
+            direction = "Bottom";
+        else if(angle == -90)
+            direction = "Up";
+        else if(angle == 180)
+            direction = "Right";
+    }
+    if(!main_direction_is_X && distanceY > 0)
+    {
+        if(angle == 0)
+            direction = "Up";
+        else if(angle == 90)
+            direction = "Left";
+        else if(angle == -90)
+            direction = "Right";
+        else if(angle == 180)
+            direction = "Down";
+    }
+    else if(!main_direction_is_X && distanceY < 0)
+    {
+        if(angle == 0)
+            direction = "Down";
+        else if(angle == 90)
+            direction = "Right";
+        else if(angle == -90)
+            direction = "Left";
+        else if(angle == 180)
+            direction = "Up";
+    }
+
+
+
+
+    return direction;
 }
 
 QList<Movement *> MovementDatabase::movements() const

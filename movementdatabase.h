@@ -17,9 +17,10 @@ public:
     Q_INVOKABLE void reset();
 
     QList<Movement *> movements() const;
+    QString getDirection();
 
 signals:
-    void movementsUpdated(qreal x_pos, qreal y_pos, qreal angle);
+    void movementsUpdated(qreal x_pos, qreal y_pos, qreal angle, QString direction);
     void angleUpdated(double alpha);
 
 private:

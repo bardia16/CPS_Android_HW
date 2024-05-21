@@ -22,7 +22,7 @@ void Accelerometer::start()
     if (!sensor->isActive())
     {
         sensor->start();
-        timer->start(sampling_interval);
+        timer->start(accel_sampling_interval);
         emit activeChanged();
         qDebug() << "Accelerometer started.";
     }
@@ -73,8 +73,8 @@ void Accelerometer::onSensorReadingChanged()
 
         }
 
-        velocityX += x * sampling_interval/1000;
-        velocityY += y * sampling_interval/1000;
+        velocityX += x * accel_sampling_interval/1000;
+        velocityY += y * accel_sampling_interval/1000;
         //velocity += std::sqrt(velocityX * velocityX + velocityY * velocityY);
 
         QString output = QStringLiteral("X: %1  Y: %2  Velocity: X: %3  Y: %4")
@@ -94,7 +94,7 @@ void Accelerometer::onSensorReadingChanged()
 
 QVector2D Accelerometer::frictionalAccel(qreal velocityX, qreal velocityY)
 {
-    qreal frictionalDecay = accel_threshold * sampling_interval / 1000;
+    qreal frictionalDecay = accel_threshold * accel_sampling_interval / 1000;
 
     if (velocityX > 0) // If velocityX is positive
     {
