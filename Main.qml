@@ -64,9 +64,20 @@ ApplicationWindow {
         }
     }
 
+    PatternDatabase {
+        id: patternDatabase
+        onAuthenticationResult: updateStatusLabel(output)
+    }
+
     MovementDatabase {
         id: movementDatabase
         onMovementsUpdated: addNewMovement(x_pos, y_pos, angle, direction);
+        onNewPattern:
+        {
+            patternDatabase.addPattern(pattern)
+            patternDatabase.savePatternsToJson("Patterns.json")
+        }
+        onNewAttempt: patternDatabase.authenticatePattern(pattern)
     }
 
     ColumnLayout {
@@ -112,11 +123,11 @@ ApplicationWindow {
 
         ScrollView {
             Layout.fillWidth: true
-            Layout.preferredHeight: 200
+            Layout.preferredHeight: 300
             TextArea {
                 id: outputArea
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                font.pixelSize: 14
+                font.pixelSize: 12
                 font.bold: true
                 readOnly: true
             }
@@ -153,6 +164,7 @@ ApplicationWindow {
                     text = "Start Recording"
                     accelerometer.stop()
                     gyroscope.stop()
+                    movementDatabase.createNewPattern(false)
                 }
             }
         }
@@ -163,11 +175,20 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.preferredHeight: 41
             onClicked: {
-                text = text === "Start Attempt" ? "Stop Attempt" : "Start Attempt"
+                if (text === "Start Attempt") {
+                    text = "Stop Attempt"
+                    accelerometer.start()
+                    gyroscope.start()
+                } else {
+                    text = "Start Attempt"
+                    accelerometer.stop()
+                    gyroscope.stop()
+                    movementDatabase.createNewPattern(true)
+                }
             }
         }
 
-        Button {
+        /*Button {
             id: authenticateButton
             text: qsTr("Authenticate")
             Layout.fillWidth: true
@@ -175,7 +196,7 @@ ApplicationWindow {
             onClicked: {
                 // Add your authenticate function here
             }
-        }
+        }*/
 
         Button {
             id: resetButton

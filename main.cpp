@@ -4,6 +4,7 @@
 #include "accelerometer.h"
 #include "gyroscope.h"
 #include "movementdatabase.h"
+#include "patterndatabase.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Accelerometer>("com.example", 1, 0, "Accelerometer");
     qmlRegisterType<Gyroscope>("com.example", 1, 0, "Gyroscope");
     qmlRegisterType<MovementDatabase>("com.example", 1, 0, "MovementDatabase");
+    qmlRegisterType<PatternDatabase>("com.example", 1, 0, "PatternDatabase");
 
     QQmlApplicationEngine engine;
 
