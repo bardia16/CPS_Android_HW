@@ -30,7 +30,7 @@ the challenges we face in the project:
 Main.qml file contains the codes of UI of our application and also it can be considered as a connection between our source files. these connections are made and handled by signals. the format of this file is like javascript. 
 
 ### ApplicationWindow:
-```JavaScript
+```QML
 ApplicationWindow {
     visible: true
     width: 341
@@ -40,7 +40,7 @@ ApplicationWindow {
 Defines the main application window with properties for visibility, size, and title.
 
 ### Properties:
-```JavaScript
+```QML
     property string gyroCalibrationMessage: ""
     property string accelCalibrationMessage: ""
     property bool gyroCalibrated: false
@@ -50,7 +50,7 @@ These properties store calibration messages and flags indicating whether the gyr
 ### Functions:
 We have implemented some functions in this file that handle various tasks: 
 #### addNewMovement
-```JavaScript
+```QML
     function addNewMovement(xValue, yValue, angle, direction) {
         var formattedX = xValue.toFixed(2);
         var formattedY = yValue.toFixed(2);
@@ -64,7 +64,7 @@ Whenever this function is called the text in the ScrollView element will be upda
 Here `var formattedX = xValue.toFixed(2);` Formats the `xValue` to two decimal places and assigns it to the variable `formattedX`. the next 2 lines are just like this part.
 
 #### updateAccelText
-```JavaScript
+```QML
     function updateAccelText(output) {
         accelText.text = "Accel: " + output;
     }
@@ -72,7 +72,7 @@ Here `var formattedX = xValue.toFixed(2);` Formats the `xValue` to two decimal p
 whenever this function is called the text of Accel label will be updated.
 
 #### updateGyroText
-```JavaScript
+```QML
     function updateGyroText(output) {
         angleText.text = "Angle: " + output;
     }
@@ -80,7 +80,7 @@ whenever this function is called the text of Accel label will be updated.
 whenever this function is called the text of Angle label will be updated.
 
 #### updateStatusLabel
-```JavaScript
+```QML
     function updateStatusLabel(output) {
         statusText.text = "Status: " + output;
     }
@@ -88,7 +88,7 @@ whenever this function is called the text of Angle label will be updated.
 whenever this function is called the text of Status label will be updated.
 
 #### checkCalibrationCompletion
-```JavaScript
+```QML
     function checkCalibrationCompletion() {
         if (gyroCalibrated && accelCalibrated) {
             updateStatusLabel(gyroCalibrationMessage + "\n" + accelCalibrationMessage);
@@ -98,7 +98,7 @@ whenever this function is called the text of Status label will be updated.
 whenever this function is called the text of Status label will be conditionally updated. the condition is based on two parameters "gyroCalibrated" and "accelCalibrated", which are status parameters that show whether each sensor is yet calibrated or not.
 
 ### Sensor Components:
-```JavaScript
+```QML
     Accelerometer {
         id: accelerometer
         onReadingUpdated: updateAccelText(output)
@@ -127,7 +127,7 @@ whenever this function is called the text of Status label will be conditionally 
     }
 ```
 ### UI Layout:
-```JavaScript
+```QML
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 20
@@ -148,7 +148,7 @@ each label has these properties:
 - verticalAlignment: set the alignment of the text.
 
   ** Here we have 4 labels including statusText, angleText, accelText, and patterns.
-  ```JavaScript
+  ```QML
           Label {
             id: statusText
             Layout.preferredHeight: 51
@@ -203,7 +203,7 @@ each scrollView has these properties:
     - font.bold: set if we want the text to be bold or not.
     - readOnly: This property makes the TextArea read-only, meaning users can't edit its content directly.
 
-```JavaScript
+```QML
         ScrollView {
             Layout.fillWidth: true
             Layout.preferredHeight: 200
@@ -228,7 +228,7 @@ each button has these properties:
 - onClicked: A signal handler that defines what happens when the button is clicked.
 
 ** Here we have 5 buttons:
-```JavaScript
+```QML
         Button {
             id: calibration
             text: qsTr("Calibration")
