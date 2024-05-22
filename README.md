@@ -339,11 +339,121 @@ when we create a QtQuick project it will automatically generate this file with i
 ```
 These lines of code are registering custom C++ classes with the QML type system. This allows these classes to be used directly in QML files. <br/>
 Template Parameter (<T>): This specifies the C++ class we are registering. For example, Accelerometer, Gyroscope, and MovementDatabase in our case. <br/>
-"com.example": This is the URI (Uniform Resource Identifier) of the module in which the type is registered. It acts like a namespace or module name in QML. As you see that it is included in the .QML file. <br/>
+"com.example": This is the URI (Uniform Resource Identifier) of the module in which the type is registered. It acts like a namespace or module name in QML. As you see it is imported in the .QML file. <br/>
 1 and 0 are used for the version number of the module, the major and minor part. in this case, our version will be 1.0. <br/>
-last parameter is the name by which the type will be known in QML. by this way we can instantiate and use objects of these types in our .QML file.
+last parameter is the name by which the type will be known in QML. by this way we can instantiate and use objects of these types in our .QML file. <br/>
+whenever we make a file (object) and we want to use that object in our QML file, by this way we can add it to our created module ("com.example").
 ```QML
     MovementDatabase movementDatabase;
     engine.rootContext()->setContextProperty("movementDatabase", &movementDatabase);
 ```
 This makes the instance accessible in QML files under the name movementDatabase. later we will observe and explain about movementDatabase. 
+
+## Accelerometer class
+Accelerometer class is designed to interface with a QML application to handle accelerometer sensor readings. It provides functionality for starting and stopping the sensor, processing the sensor readings, applying a Kalman filter for noise reduction, handling calibration, and emitting relevant signals for use in a QML application. Here we explain each part of this class in detail:
+
+### Constructor
+```cpp
+Accelerometer::Accelerometer(QObject *parent) : QObject(parent), x_bias(0.0), y_bias(0.0),
+    xKalman(0.1, 1, 0.1, 0.0), yKalman(0.1, 1, 0.1, 0.0), velocity(0.0),velocityX(0.0), velocityY(0.0) // Initialize Kalman filters
+{
+    sensor = new QAccelerometer(this);
+    timer = new QTimer(this);
+    calibrationTimer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &Accelerometer::onSensorReadingChanged);
+    connect(calibrationTimer, &QTimer::timeout, this, &Accelerometer::onCalibrationFinished);
+}
+```
+here we initialize member variables, including bias, Kalman filter, and velocities.
+the reason that we have bias is that when we do calibration we check the base state of velocity of the cellphone. and we name this initial state as bias and when we want to calculate new velocities we should consider this bias as well. Kalman filter is for noise reduction. we will explain its algorithm later. but briefly, it reduce the noise by choosing to consider and rely more on the older data or newer ones. In this way, sudden short changes in velocity won't affect the result. for the velocity we have 3 kinds, one for x direction and the other for y direction and one of them is the general velocity. <br/>
+then we make an instance of the available QAccelerometer sensor object. <br/>
+we have two types of timers. One is for sampling intervals (timer) and the other (calibrationTimer) is for handling calibration. then we connect the timer signal to `onSensorReadingChanged` function. so whenever a timer reach a specified time(we have specified the time intervals in this file in start method), and timeout occurs this function will be called. <br/>
+also we connect the `calibrationTimer` signal to  `onCalibrationFinished` function. so whenever a this timer reach a specified time(we have specified the time intervals in .... file), and timeout occurs this function will be called.
+### Destructor
+```cpp
+Accelerometer::~Accelerometer()
+{
+    stop();
+    delete sensor;
+}
+```
+Ensures that the sensor is stopped and deleted when the Accelerometer object is destroyed to clean up resources properly.
+### Start method and Stop method
+```cpp
+void Accelerometer::start()
+{
+    if (!sensor->isActive())
+    {
+        sensor->start();
+        timer->start(accel_sampling_interval);
+        emit activeChanged();
+        qDebug() << "Accelerometer started.";
+    }
+}
+
+void Accelerometer::stop()
+{
+    if (sensor->isActive())
+    {
+        sensor->stop();
+        timer->stop();
+        calibrationTimer->stop();
+        emit activeChanged();
+        qDebug() << "Accelerometer stopped.";
+    }
+}
+```
+- start: Starts the accelerometer sensor and a timer to periodically read sensor data. Emits the activeChanged signal and logs the action. later we will show what will happen when the activeChanged signal is emitted. 
+- stop: Stops the accelerometer sensor and the timers. Emits the activeChanged signal and logs the action.
+### Sensor Reading Handling
+onSensorReadingChanged: Handles sensor readings when the timer times out.
+```cpp
+void Accelerometer::onSensorReadingChanged()
+{
+    QAccelerometerReading *reading = sensor->reading();
+    if (reading)
+    {
+        qreal x = reading->x();
+        qreal y = reading->y();
+
+        // Apply Kalman filter
+        x = xKalman.update(x);
+        y = yKalman.update(y);
+
+        // Adjust for bias
+        if (std::abs(x) <= accel_threshold)
+            x = 0.0;
+        else
+            x -= x_bias;
+
+        if (std::abs(y) <= accel_threshold)
+            y = 0.0;
+        else
+            y -= y_bias;
+
+        if (x == 0 && y == 0) // frictional accel
+        {
+            QVector2D newVelocities = frictionalAccel(velocityX, velocityY);
+            velocityX = newVelocities.x();
+            velocityY = newVelocities.y();
+        }
+
+        velocityX += x * accel_sampling_interval / 1000;
+        velocityY += y * accel_sampling_interval / 1000;
+
+        QString output = QStringLiteral("X: %1  Y: %2  Velocity: X: %3  Y: %4")
+                             .arg(QString::number(x, 'f', 2),
+                                  QString::number(y, 'f', 2),
+                                  QString::number(velocityX, 'f', 2),
+                                  QString::number(velocityY, 'f', 2));
+        emit readingUpdated(output);
+        emit newAcceleration(x, y, velocityX, velocityY);
+        //qDebug() << output;
+    }
+    else
+    {
+        qDebug() << "No reading available.";
+    }
+}
+```
+when this function is called, first we read the data from the accelerometer sensor. if there is data to read we do the following steps otherwise we log the appropriate message indicating that we have no data to read. then we extract the velocity of x and y from the read data. and update them by applying the Kalman algorithm for noise reduction. 
