@@ -330,17 +330,17 @@ int main(int argc, char *argv[])
     return app.exec();
 }
 ```
-main.cpp file is the main entry point for a Qt Quick application. It sets up the application, registers custom QML types, and loads the main QML file to start the application. 
+main.cpp file is the main entry point for a Qt Quick application. It sets up the application, registers custom QML types, and loads the main QML file to start the application. <br/>
 when we create a QtQuick project it will automatically generate this file with initial codes. So just need to add these parts:
 ```QML
     qmlRegisterType<Accelerometer>("com.example", 1, 0, "Accelerometer");
     qmlRegisterType<Gyroscope>("com.example", 1, 0, "Gyroscope");
     qmlRegisterType<MovementDatabase>("com.example", 1, 0, "MovementDatabase");
 ```
-These lines of code are registering custom C++ classes with the QML type system. This allows these classes to be used directly in QML files.
-Template Parameter (<T>): This specifies the C++ class we are registering. For example, Accelerometer, Gyroscope, and MovementDatabase in our case.
-"com.example": This is the URI (Uniform Resource Identifier) of the module in which the type is registered. It acts like a namespace or module name in QML. As you see that it is included in the .QML file.
-1 and 0 are used for the version number of the module, the major and minor part. in this case, our version will be 1.0.
+These lines of code are registering custom C++ classes with the QML type system. This allows these classes to be used directly in QML files. <br/>
+Template Parameter (<T>): This specifies the C++ class we are registering. For example, Accelerometer, Gyroscope, and MovementDatabase in our case. <br/>
+"com.example": This is the URI (Uniform Resource Identifier) of the module in which the type is registered. It acts like a namespace or module name in QML. As you see that it is included in the .QML file. <br/>
+1 and 0 are used for the version number of the module, the major and minor part. in this case, our version will be 1.0. <br/>
 last parameter is the name by which the type will be known in QML. by this way we can instantiate and use objects of these types in our .QML file.
 ```QML
     MovementDatabase movementDatabase;
