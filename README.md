@@ -302,7 +302,48 @@ each button has these properties:
 - authenticateButton:
 - resetButton: when this button is clicked our sensors will reset. and all the movements in movementDatabase will be deleted. 
 
+## main entry to the project
+```QML
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
 
+    qmlRegisterType<Accelerometer>("com.example", 1, 0, "Accelerometer");
+    qmlRegisterType<Gyroscope>("com.example", 1, 0, "Gyroscope");
+    qmlRegisterType<MovementDatabase>("com.example", 1, 0, "MovementDatabase");
 
+    QQmlApplicationEngine engine;
 
+    MovementDatabase movementDatabase;
+    engine.rootContext()->setContextProperty("movementDatabase", &movementDatabase);
 
+    const QUrl url(u"qrc:/QtQuickProject/Main.qml"_qs);
+    QObject::connect(
+        &engine,
+        &QQmlApplicationEngine::objectCreationFailed,
+        &app,
+        []() { QCoreApplication::exit(-1); },
+        Qt::QueuedConnection);
+
+    engine.load(url);
+
+    return app.exec();
+}
+```
+main.cpp file is the main entry point for a Qt Quick application. It sets up the application, registers custom QML types, and loads the main QML file to start the application. 
+when we create a QtQuick project it will automatically generate this file with initial codes. So just need to add these parts:
+```QML
+    qmlRegisterType<Accelerometer>("com.example", 1, 0, "Accelerometer");
+    qmlRegisterType<Gyroscope>("com.example", 1, 0, "Gyroscope");
+    qmlRegisterType<MovementDatabase>("com.example", 1, 0, "MovementDatabase");
+```
+These lines of code are registering custom C++ classes with the QML type system. This allows these classes to be used directly in QML files.
+Template Parameter (<T>): This specifies the C++ class we are registering. For example, Accelerometer, Gyroscope, and MovementDatabase in our case.
+"com.example": This is the URI (Uniform Resource Identifier) of the module in which the type is registered. It acts like a namespace or module name in QML. As you see that it is included in the .QML file.
+1 and 0 are used for the version number of the module, the major and minor part. in this case, our version will be 1.0.
+last parameter is the name by which the type will be known in QML. by this way we can instantiate and use objects of these types in our .QML file.
+```QML
+    MovementDatabase movementDatabase;
+    engine.rootContext()->setContextProperty("movementDatabase", &movementDatabase);
+```
+This makes the instance accessible in QML files under the name movementDatabase. later we will observe and explain about movementDatabase. 
