@@ -20,6 +20,7 @@ public:
     qreal calculateDistanceTraveledX() const;
     qreal calculateDistanceTraveledY() const;
     QVector<QVector3D> accelerations;
+    QVector<double> angleChanges;
     void setStartPosition(qreal x, qreal y);
     void setStartAngle(qreal angle);
     QVector3D getCurrentPosition() const;
@@ -32,7 +33,6 @@ private:
     qreal sampleInterval;
     double currentAngle;
     QString currentDirection;
-    QVector<double> angleChanges; // Store angle changes
 };
 
 #endif // MOVEMENT_H

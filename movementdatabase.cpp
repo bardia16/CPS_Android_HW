@@ -2,7 +2,7 @@
 #include <cmath>
 #include <QDebug>
 
-#define min_distance 0.1
+#define min_distance 0.2
 MovementDatabase::MovementDatabase(QObject *parent)
     : QObject(parent), currentMovement(new Movement(this))
 {
@@ -11,12 +11,22 @@ MovementDatabase::MovementDatabase(QObject *parent)
 
 void MovementDatabase::handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias)
 {
-    if (std::abs(x) <= min_acceleration && std::abs(y) <= min_acceleration && currentMovement->calculateDistanceTraveled() > min_distance
-        && (std::abs(velocityX) <= min_velocity && std::abs(velocityY) <= min_velocity))
+    if (std::abs(x) <= min_acceleration && std::abs(y) <= min_acceleration && (std::abs(velocityX) <= min_velocity && std::abs(velocityY) <= min_velocity))
     {
-        createNewMovement();
-        qDebug() << "Creating new movements";
+        if(currentMovement->calculateDistanceTraveled() >= min_distance)
+        {
+            createNewMovement();
+            qDebug() << "Creating new movements";
+        }
+        else if(currentMovement->calculateDistanceTraveled() < min_distance)
+        {
+            currentMovement->accelerations.clear();
+            currentMovement->angleChanges.clear(); // no need to store because the movement was rotation
+            qDebug() << "Movement cleared";
+        }
+
     }
+
     if (std::abs(x) >= min_acceleration || std::abs(y) >= min_acceleration) {
         currentMovement->addAcceleration(x, y);
     }
