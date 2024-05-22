@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QList>
+#include <QJsonArray>
+#include <QJsonObject>
 #include "movement.h"
 
 class Pattern : public QObject
@@ -12,9 +14,11 @@ class Pattern : public QObject
 public:
     explicit Pattern(const QList<Movement*> &movements, QObject *parent = nullptr);
     bool authenticate(Pattern *other) const;
+    QJsonArray toJson() const;
 
 private:
     QList<Movement*> m_movements;
+
     static constexpr double LOCATION_THRESHOLD = 0.5;
 };
 

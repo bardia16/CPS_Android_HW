@@ -18,7 +18,7 @@ void MovementDatabase::handleNewAcceleration(double x, double y, double velocity
             createNewMovement();
             qDebug() << "Creating new movements";
         }
-        else if(currentMovement->calculateDistanceTraveled() < min_distance)
+        else if(currentMovement->calculateDistanceTraveled() < min_distance && currentMovement->calculateDistanceTraveled() > 0.0)
         {
             currentMovement->accelerations.clear();
             currentMovement->angleChanges.clear(); // no need to store because the movement was rotation
@@ -30,7 +30,7 @@ void MovementDatabase::handleNewAcceleration(double x, double y, double velocity
     if (std::abs(x) >= min_acceleration || std::abs(y) >= min_acceleration) {
         currentMovement->addAcceleration(x, y);
     }
-    qDebug() << m_movements;
+    //qDebug() << m_movements;
 }
 
 void MovementDatabase::handleNewAngle(double alpha)

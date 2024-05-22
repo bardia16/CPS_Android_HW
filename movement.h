@@ -25,7 +25,7 @@ public:
     void setStartAngle(qreal angle);
     QVector3D getCurrentPosition() const;
     double getCurrentAngle() const;
-    QString getDirection();
+    QString getDirection() const;
     void findDirection();
 
 private:

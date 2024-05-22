@@ -84,7 +84,7 @@ void Accelerometer::onSensorReadingChanged()
                                   QString::number(velocityY, 'f', 2));
         emit readingUpdated(output);
         emit newAcceleration(x, y, velocityX, velocityY);
-        qDebug() << output;
+        //qDebug() << output;
     }
     else
     {

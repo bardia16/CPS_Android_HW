@@ -72,7 +72,11 @@ ApplicationWindow {
     MovementDatabase {
         id: movementDatabase
         onMovementsUpdated: addNewMovement(x_pos, y_pos, angle, direction);
-        onNewPattern: patternDatabase.addPattern(pattern)
+        onNewPattern:
+        {
+            patternDatabase.addPattern(pattern)
+            patternDatabase.savePatternsToJson("Patterns.json")
+        }
         onNewAttempt: patternDatabase.authenticatePattern(pattern)
     }
 

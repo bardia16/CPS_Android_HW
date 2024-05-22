@@ -39,7 +39,7 @@ qreal Movement::calculateDistanceTraveled() const
         previousVelocityX = velocityX;
         previousVelocityY = velocityY;
     }
-    qDebug() << totalDistance;
+    //qDebug() << totalDistance;
     return totalDistance;
 }
 
@@ -187,7 +187,7 @@ void Movement::findDirection()
     currentDirection = direction;
 }
 
-QString Movement::getDirection()
+QString Movement::getDirection() const
 {
     return currentDirection;
 }
