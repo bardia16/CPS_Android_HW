@@ -60,12 +60,16 @@ We have implemented some functions in this file that handle various tasks:
                 formattedAngle + " Direction: " + direction + "\n";
     }
 ```
+Whenever this function is called the text in the ScrollView element will be updated by adding new movement to the box which shows the position, angle, and direction.
+Here `var formattedX = xValue.toFixed(2);` Formats the `xValue` to two decimal places and assigns it to the variable `formattedX`. the next 2 lines are just like this part.
+
 #### updateAccelText
 ```JavaScript
     function updateAccelText(output) {
         accelText.text = "Accel: " + output;
     }
 ```
+whenever this function is called the text of Accel label will be updated.
 
 #### updateGyroText
 ```JavaScript
@@ -73,6 +77,7 @@ We have implemented some functions in this file that handle various tasks:
         angleText.text = "Angle: " + output;
     }
 ```
+whenever this function is called the text of Angle label will be updated.
 
 #### updateStatusLabel
 ```JavaScript
@@ -80,6 +85,7 @@ We have implemented some functions in this file that handle various tasks:
         statusText.text = "Status: " + output;
     }
 ```
+whenever this function is called the text of Status label will be updated.
 
 #### checkCalibrationCompletion
 ```JavaScript
@@ -89,6 +95,7 @@ We have implemented some functions in this file that handle various tasks:
         }
     }
 ```
+whenever this function is called the text of Status label will be conditionally updated. the condition is based on two parameters "gyroCalibrated" and "accelCalibrated", which are status parameters that show whether each sensor is yet calibrated or not.
 
 ### Sensor Components:
 ```JavaScript
