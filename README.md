@@ -406,7 +406,7 @@ void Accelerometer::stop()
     }
 }
 ```
-- start: Starts the accelerometer sensor and a timer to periodically read sensor data. Emits the activeChanged signal and logs the action. later we will show what will happen when the `activeChanged` signal is emitted. 
+- start: Starts the accelerometer sensor and a timer to periodically read sensor data. Emits the activeChanged signal and logs the action.
 - stop: Stops the accelerometer sensor and the timers. Emits the `activeChanged` signal and logs the action.
 ### Sensor Reading Handling
 onSensorReadingChanged: Handles sensor readings when the timer times out.
@@ -538,7 +538,7 @@ void Accelerometer::calibration()
     connect(sensor, &QAccelerometer::readingChanged, this, &Accelerometer::onCalibrationReadingChanged);
 }
 ```
-calibration: Starts the sensor and prepares for calibration by clearing previous values and starting a timer for the calibration duration. from this time we connect `onCalibrationReadingChanged` function to the `readingChanged` signal. it says that for the calibration process we will manually emit reading data signal to read data form sensor in time intervals. instead, the `readingChanged` signal will be authomatically emited whenver a new data is available to read on sensor. 
+calibration: Starts the sensor and prepares for calibration by clearing previous values and starting a timer for the calibration duration. from this time we connect `onCalibrationReadingChanged` function to the `readingChanged` signal. it says that for the calibration process we will manually emit reading data signal to read data form sensor in time intervals. instead, the `readingChanged` signal will be authomatically emited whenever a new data is available to read on sensor. 
 ```cpp
 void Accelerometer::onCalibrationReadingChanged()
 {
@@ -584,3 +584,213 @@ void Accelerometer::onCalibrationFinished()
 ```
 this function will be called when the timer of the calibration is timeout. then we will stop the sensor from reading. and stop the timer as well(because we just want to calibrate single time). then disconnect `readingChanged` signal because henceforward we don't want to read data from sensor whenever new data is available instead we want to read data by time intervals and get samples priadically.<br/>
 in this function we calculate bias by calculating the average of the velocities we have saved in history during the `calibrationDuration`. at the end, we specify the format of output which will be shown on the screen. then we emit `calibrationFinished` signal Indicates that calibration is complete and provides the calibration result. whenever this signal is emmited we will show the output on the screen of our application.
+
+## Gyroscope class
+The Gyroscope class in the provided code is designed to handle the operations of a gyroscope sensor within a Qt application. The class uses the `QGyroscope` sensor to read gyroscope data, applies Kalman filtering to the sensor data, performs calibration to determine sensor biases, and emits signals for use in the QML frontend.
+### Constructor
+```cpp
+Gyroscope::Gyroscope(QObject *parent)
+    : QObject(parent), z_bias(0.0), currentAngle(0.0), angleKalman(0.1, 1, 0.1, 0.0) // Initialize Kalman filter
+{
+    sensor = new QGyroscope(this);
+    timer = new QTimer(this);
+    calibrationTimer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &Gyroscope::onSensorReadingChanged);
+    connect(calibrationTimer, &QTimer::timeout, this, &Gyroscope::onCalibrationFinished);
+}
+```
+here we initialize member variables, including bias, Kalman filter, and the angle.<br/>
+note that we consider just one angle in z direction.<br/>
+the reason that we have bias is that when we do calibration we check the base state of angle of the cellphone. and we name this initial state as bias and when we want to calculate new angle we should consider this bias as well. Kalman filter is for noise reduction. we will explain its algorithm later.<br/>
+the angle will be updated after each time intervals. <br/>
+then we make an instance of the available `QGyroscope` sensor object. <br/>
+here like Accelormeter, we have two types of timers. One is for sampling intervals (timer) and the other (calibrationTimer) is for handling calibration. then we connect the timer signal to `onSensorReadingChanged` function. so whenever a timer reaches a specified time(we have specified the time intervals in this file in start method), and timeout occurs this function will be called. <br/>
+also, we connect the `calibrationTimer` signal to  `onCalibrationFinished` function. so whenever this timer reaches a specified time(we have specified this time duration in calibration method), and timeout occurs, this function will be called. <br/>
+the reason that we have `calibrationTimer` is that for calculating the initial bias we should get many samples from the sensors in one period of time and calculate the average. thus for indicating the duration of this period we need to set a `calibrationTimer`.
+
+### Destructor
+```cpp
+Gyroscope::~Gyroscope()
+{
+    stop();
+    delete sensor;
+}
+```
+Ensures that the sensor is stopped and deleted when the Gyroscope object is destroyed to clean up resources properly.
+
+### Start method and Stop method
+```cpp
+void Gyroscope::start()
+{
+    if (!sensor->isActive())
+    {
+        currentAngle = 0.0; // reset it
+        sensor->start();
+        timer->start(gyro_sampling_interval);
+        emit activeChanged();
+        qDebug() << "Gyroscope started.";
+    }
+}
+
+void Gyroscope::stop()
+{
+    if (sensor->isActive())
+    {
+        sensor->stop();
+        timer->stop();
+        calibrationTimer->stop();
+        emit activeChanged();
+        qDebug() << "Gyroscope stopped.";
+    }
+}
+```
+- start: Starts the gyroscope sensor and a timer to periodically read sensor data. Emits the activeChanged signal and logs the action.
+- stop: Stops the accelerometer sensor and the timers. Emits the `activeChanged` signal and logs the action.
+
+### Calibration Methods
+```cpp
+void Gyroscope::calibration()
+{
+    sensor->start();
+    z_values.clear();
+    calibrationTimer->start(calibrationDuration);
+    connect(sensor, &QGyroscope::readingChanged, this, &Gyroscope::onCalibrationReadingChanged);
+}
+```
+calibration: Starts the sensor and prepares for calibration by clearing previous values and starting a timer for the calibration duration. from this time we connect `onCalibrationReadingChanged` function to the `readingChanged` signal. it says that for the calibration process we will manually emit reading data signal to read data form sensor in time intervals. instead, the `readingChanged` signal will be authomatically emited whenever a new data is available to read on sensor. 
+```cpp
+void Gyroscope::onCalibrationReadingChanged()
+{
+    QGyroscopeReading *reading = sensor->reading();
+    if (reading)
+    {
+        z_values.append(reading->z());
+    }
+    else
+    {
+        qDebug() << "No reading available.";
+    }
+}
+```
+this function will be called whenever `readingChanged` signal is emited. then it will read data from the sensor and append current angular velocity to array of angular velociti's history. (we will need these angles during the `calibrationDuration` in order to calculate bias)
+```cpp
+void Gyroscope::onCalibrationFinished()
+{
+    sensor->stop();
+    calibrationTimer->stop();
+    disconnect(sensor, &QGyroscope::readingChanged, this, &Gyroscope::onCalibrationReadingChanged);
+
+    double z_sum = 0.0;
+    for (double z : z_values)
+        z_sum += z;
+
+    z_bias = z_sum / z_values.size();
+
+    QString output = QStringLiteral("Calibration complete\tZ bias: %1")
+                         .arg(QString::number(z_bias, 'f', 1));
+    qDebug() << "Bias: " + output;
+
+    emit calibrationFinished(output);
+}
+```
+this function will be called when the timer of the calibration is timeout. then we will stop the sensor from reading. and stop the timer as well(because we just want to calibrate single time). then disconnect `readingChanged` signal because henceforward we don't want to read data from sensor whenever new data is available instead we want to read data by time intervals and get samples priadically.<br/>
+in this function we calculate bias by calculating the average of the angular velocities we have saved in history during the `calibrationDuration`. at the end, we specify the format of output which will be shown on the screen. then we emit `calibrationFinished` signal indicates that calibration is complete and provides the calibration result. whenever this signal is emited we will show the output on the screen of our application.
+
+### Sensor Reading Handling
+```cpp
+void Gyroscope::onSensorReadingChanged()
+{
+    QGyroscopeReading *reading = sensor->reading();
+    if (reading)
+    {
+        double alpha = reading->z();
+
+        // Apply Kalman filter
+        alpha = angleKalman.update(alpha);
+
+        // Adjust for bias
+        alpha -= z_bias;
+
+        // Apply threshold
+        if (std::abs(alpha) < gyro_threshold)
+            alpha = 0.0;
+
+        double angleChange = alpha * 0.01;
+        currentAngle += angleChange;
+
+
+        if (currentAngle >= 360.0) currentAngle -= 360.0;
+        if (currentAngle < 0.0) currentAngle += 360.0;
+
+        // Normalize the angle change
+        double normalizedAngle = 0.0;
+        if (currentAngle >= 60.0 && currentAngle < 135.0) {
+            normalizedAngle = 90.0;
+        } else if (currentAngle >= 135.0 && currentAngle < 225.0) {
+            normalizedAngle = 180.0;
+        } else if (currentAngle >= 225.0 && currentAngle < 315.0) {
+            normalizedAngle = -90.0;
+        } else {
+            normalizedAngle = 0.0;
+        }
+
+        QString output = QStringLiteral("Alpha: %1").arg(QString::number(normalizedAngle, 'f', 2));
+
+        emit readingUpdated(output);
+        emit newRotation(normalizedAngle);
+
+    }
+    else
+    {
+        qDebug() << "No reading available.";
+    }
+}
+```
+this function will be called after each time interval, first, we read the data from the gyroscope sensor. if there is data to read we do the following steps otherwise we log the appropriate message indicating that we have no data to read. then we extract the angular velocity in z direction from the read data. and update it by applying the Kalman algorithm for noise reduction. <br/>
+then we apply bias. and then check if our current angular velocity is less than a threshold or not.
+we have a threshold for angular velocity and whenever we are less than that threshold we consider the velocity as zero. the reason is that to set small values to zero to handle sensor noise. we've determined this threshold variable by trial and error. </br>
+```cpp
+        double angleChange = alpha * 0.01;
+        currentAngle += angleChange;
+```
+here we update our angular velocity. To do this, we multiply the current angular velocity by time intervals to reach delta v. Then we add it to previous angular velocity.
+
+```cpp
+        if (currentAngle >= 360.0) currentAngle -= 360.0;
+        if (currentAngle < 0.0) currentAngle += 360.0;
+
+        // Normalize the angle change
+        double normalizedAngle = 0.0;
+        if (currentAngle >= 60.0 && currentAngle < 135.0) {
+            normalizedAngle = 90.0;
+        } else if (currentAngle >= 135.0 && currentAngle < 225.0) {
+            normalizedAngle = 180.0;
+        } else if (currentAngle >= 225.0 && currentAngle < 315.0) {
+            normalizedAngle = -90.0;
+        } else {
+            normalizedAngle = 0.0;
+        }
+```
+here we normalize the angel. our valid angels are 0, 90, 180, -90. so we try to normalize the angle to reach these valid angels.
+```cpp
+        QString output = QStringLiteral("Alpha: %1").arg(QString::number(normalizedAngle, 'f', 2));
+
+        emit readingUpdated(output);
+        emit newRotation(normalizedAngle);
+```
+here we can see the format of the output that will be shown on the screen of our application which shows the angle.
+at the end, we emit signals with the updated values for use in the QML frontend.
+we will disscuss these signals later. but briefly `newRotation` signal will handle our movements (check if we have finished one movement or not yet in order to add it to our movement database). the connection of this signal can be seen in .QML file. <br/>
+`readingUpdated` signal is emited to handle what should be shown on the screen. 
+
+### Reset Method
+```cpp
+void Gyroscope::reset()
+{
+    //z_bias = 0.0;
+    currentAngle = 0.0;
+    //angleKalman.reset(0.0);
+    qDebug() << "Gyroscope reset.";
+}
+```
+reset: Resets the current angle to 0 and logs the action.
