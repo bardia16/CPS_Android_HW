@@ -193,7 +193,7 @@ in the following picture, you can see each label and its corresponding text.
 
 #### ScrollView
 A ScrollView is a container that provides a scrollable area for its child elements, which is useful when you have content that exceeds the available space.
-each scrollView has these properties: 
+each `scrollView` has these properties: 
 - Layout.fillWidth: Makes the label fill the available width.
 - Layout.preferredHeight: Sets the preferred height of the label.
 - TextArea: This is a multi-line text input field in QML. It's being used as the child element of the ScrollView.
@@ -216,7 +216,7 @@ each scrollView has these properties:
             }
         }
 ```
-in the following picture, you can see the scrollView and its inside text. Whenever one pattern is captured this text will be updated and one pattern will be appended.
+in the following picture, you can see the `scrollView` and its inside text. Whenever one pattern is captured this text will be updated and one pattern will be appended.
 
 #### Button 
 A Button is an interactive component that users can click to trigger actions.
@@ -300,7 +300,7 @@ each button has these properties:
 - startRecordingButton: the text on this button will shuffled whenever is clicked. if it was "Start Recording" by clicking it will become "Stop Recording". Also, accelerator and gyroscope sensors will start working. then when we click again on this button the text will change back to "Start Recording". Also, the accelerator and gyroscope sensors will stop working.
 - startAttemptButton: 
 - authenticateButton:
-- resetButton: when this button is clicked our sensors will reset. and all the movements in movementDatabase will be deleted. 
+- resetButton: when this button is clicked our sensors will reset. and all the movements in `movementDatabase` will be deleted. 
 
 ## main entry to the project
 ```QML
@@ -338,7 +338,7 @@ when we create a QtQuick project it will automatically generate this file with i
     qmlRegisterType<MovementDatabase>("com.example", 1, 0, "MovementDatabase");
 ```
 These lines of code are registering custom C++ classes with the QML type system. This allows these classes to be used directly in QML files. <br/>
-Template Parameter (<T>): This specifies the C++ class we are registering. For example, Accelerometer, Gyroscope, and MovementDatabase in our case. <br/>
+Template Parameter (<T>): This specifies the C++ class we are registering. For example, `Accelerometer`, `Gyroscope`, and `MovementDatabase` in our case. <br/>
 "com.example": This is the URI (Uniform Resource Identifier) of the module in which the type is registered. It acts like a namespace or module name in QML. As you see it is imported in the .QML file. <br/>
 1 and 0 are used for the version number of the module, the major and minor part. in this case, our version will be 1.0. <br/>
 last parameter is the name by which the type will be known in QML. by this way we can instantiate and use objects of these types in our .QML file. <br/>
@@ -347,7 +347,7 @@ whenever we make a file (object) and we want to use that object in our QML file,
     MovementDatabase movementDatabase;
     engine.rootContext()->setContextProperty("movementDatabase", &movementDatabase);
 ```
-This makes the instance accessible in QML files under the name movementDatabase. later we will observe and explain about movementDatabase. 
+This makes the instance accessible in QML files under the name `movementDatabase`. later we will observe and explain about `movementDatabase`. 
 
 ## Accelerometer class
 Accelerometer class is designed to interface with a QML application to handle accelerometer sensor readings. It provides functionality for starting and stopping the sensor, processing the sensor readings, applying a Kalman filter for noise reduction, handling calibration, and emitting relevant signals for use in a QML application. Here we explain each part of this class in detail:
@@ -366,9 +366,12 @@ Accelerometer::Accelerometer(QObject *parent) : QObject(parent), x_bias(0.0), y_
 ```
 here we initialize member variables, including bias, Kalman filter, and velocities.
 the reason that we have bias is that when we do calibration we check the base state of velocity of the cellphone. and we name this initial state as bias and when we want to calculate new velocities we should consider this bias as well. Kalman filter is for noise reduction. we will explain its algorithm later. but briefly, it reduce the noise by choosing to consider and rely more on the older data or newer ones. In this way, sudden short changes in velocity won't affect the result. for the velocity we have 3 kinds, one for x direction and the other for y direction and one of them is the general velocity. <br/>
-then we make an instance of the available QAccelerometer sensor object. <br/>
-we have two types of timers. One is for sampling intervals (timer) and the other (calibrationTimer) is for handling calibration. then we connect the timer signal to `onSensorReadingChanged` function. so whenever a timer reach a specified time(we have specified the time intervals in this file in start method), and timeout occurs this function will be called. <br/>
-also we connect the `calibrationTimer` signal to  `onCalibrationFinished` function. so whenever a this timer reach a specified time(we have specified the time intervals in .... file), and timeout occurs this function will be called.
+these velocities will be calculated based on the acceleration and time by the formula: $ a * t = delta v $ and we need to add it to the previous velocity to reach the new velocity. 
+these velocities will be updated after each time intervals. <br/>
+then we make an instance of the available `QAccelerometer` sensor object. <br/>
+we have two types of timers. One is for sampling intervals (timer) and the other (calibrationTimer) is for handling calibration. then we connect the timer signal to `onSensorReadingChanged` function. so whenever a timer reaches a specified time(we have specified the time intervals in this file in start method), and timeout occurs this function will be called. <br/>
+also, we connect the `calibrationTimer` signal to  `onCalibrationFinished` function. so whenever this timer reaches a specified time(we have specified this time duration in calibration method), and timeout occurs this function will be called. <br/>
+the reason that we have `calibrationTimer` is that for calculating the initial bias we should get many samples from the sensors in one period of time and calculate the average. thus for indicating the duration of this period we need to set a `calibrationTimer`.
 ### Destructor
 ```cpp
 Accelerometer::~Accelerometer()
@@ -403,8 +406,8 @@ void Accelerometer::stop()
     }
 }
 ```
-- start: Starts the accelerometer sensor and a timer to periodically read sensor data. Emits the activeChanged signal and logs the action. later we will show what will happen when the activeChanged signal is emitted. 
-- stop: Stops the accelerometer sensor and the timers. Emits the activeChanged signal and logs the action.
+- start: Starts the accelerometer sensor and a timer to periodically read sensor data. Emits the activeChanged signal and logs the action. later we will show what will happen when the `activeChanged` signal is emitted. 
+- stop: Stops the accelerometer sensor and the timers. Emits the `activeChanged` signal and logs the action.
 ### Sensor Reading Handling
 onSensorReadingChanged: Handles sensor readings when the timer times out.
 ```cpp
@@ -456,4 +459,128 @@ void Accelerometer::onSensorReadingChanged()
     }
 }
 ```
-when this function is called, first we read the data from the accelerometer sensor. if there is data to read we do the following steps otherwise we log the appropriate message indicating that we have no data to read. then we extract the velocity of x and y from the read data. and update them by applying the Kalman algorithm for noise reduction. 
+this function will be called after each time interval, first, we read the data from the accelerometer sensor. if there is data to read we do the following steps otherwise we log the appropriate message indicating that we have no data to read. then we extract the velocity of x and y from the read data. and update them by applying the Kalman algorithm for noise reduction. <br/>
+we have a threshold for acceleration and whenever we are less than that threshold we consider the acceleration as zero. the reason is that to set small values to zero to handle sensor noise. we've determined this variable by trial and error. 
+so we check if the acceleration is less than that threshold or not. if not, we apply bias and reach the actual acceleration. 
+```cpp
+        if (x == 0 && y == 0) // frictional accel
+        {
+            QVector2D newVelocities = frictionalAccel(velocityX, velocityY);
+            velocityX = newVelocities.x();
+            velocityY = newVelocities.y();
+        }
+```
+here we consider friction force and simulate it. if we weren't considering this force, when the acceleration becomes zero, it will assume that henceforward we have a constant, not zero velocity. but in reality, we have friction force which will reduce the velocity until it becomes zero and stops. so in this code is checked if our acceleration is zero or not, if yes, we call the `frictionalAccel` function. we will explain about this function later. it will handle how the velocity should be reduced. then it returns new velocities.
+```cpp
+        velocityX += x * accel_sampling_interval / 1000;
+        velocityY += y * accel_sampling_interval / 1000;
+```
+here we update our velocities in both directions. To do this, we multiply the current velocities by time intervals to reach delta v. Then we add it to previous velocities (division by 1000 is for that our unit for time is mili second so we should convert it to second).
+```cpp
+        QString output = QStringLiteral("X: %1  Y: %2  Velocity: X: %3  Y: %4")
+                             .arg(QString::number(x, 'f', 2),
+                                  QString::number(y, 'f', 2),
+                                  QString::number(velocityX, 'f', 2),
+                                  QString::number(velocityY, 'f', 2));
+        emit readingUpdated(output);
+        emit newAcceleration(x, y, velocityX, velocityY);
+```
+here we can see the format of the output that will be shown on the screen of our application which shows the accelerations and velocities.
+at the end, we emit signals with the updated values for use in the QML frontend.
+we will disscuss these signals later. but briefly `newAcceleration` signal will handle our movements (check if we have finished one movement or not yet in order to add it to our movement database). the connection of this signal can be seen in .QML file. <br/>
+`readingUpdated` signal is emited to handle what should be shown on the screen. 
+### Frictional Acceleration Calculation
+frictionalAccel: Simulates frictional deceleration on the velocities to gradually bring them to zero when no acceleration is detected.
+```cpp
+QVector2D Accelerometer::frictionalAccel(qreal velocityX, qreal velocityY)
+{
+    qreal frictionalDecay = accel_threshold * accel_sampling_interval / 1000;
+
+    if (velocityX > 0) // If velocityX is positive
+    {
+        velocityX -= frictionalDecay;
+        if (velocityX < 0) // Ensure velocity doesn't go negative
+            velocityX = 0;
+    }
+    else if (velocityX < 0) // If velocityX is negative
+    {
+        velocityX += frictionalDecay;
+        if (velocityX > 0) // Ensure velocity doesn't go positive
+            velocityX = 0;
+    }
+
+    if (velocityY > 0) // If velocityY is positive
+    {
+        velocityY -= frictionalDecay;
+        if (velocityY < 0) // Ensure velocity doesn't go negative
+            velocityY = 0;
+    }
+    else if (velocityY < 0) // If velocityY is negative
+    {
+        velocityY += frictionalDecay;
+        if (velocityY > 0) // Ensure velocity doesn't go positive
+            velocityY = 0;
+    }
+
+    return QVector2D(velocityX, velocityY);
+}
+```
+this function will get the current velocities in both directions. then first calculate by which rate it should reduce the velocity. To calculate this, we multiply an assumed acceleration of friction by the time intervals to reach delta v. This way, we have a decay rate(division by 1000 is for that our unit for time is mili second, so we should convert it to second). in the conditional statements, we check if our velocities in each direction is positive or not. for example, if our velocity in x direction is positive it means that we should reduce it and subtract the frictionDecay from the velocity. after that, we will check if the velocity goes under zero or not. if yes, we consider the new velocity as zero. for other cases accordingly we apply this approach.
+
+### Calibration Methods
+```cpp
+void Accelerometer::calibration()
+{
+    sensor->start();
+    x_values.clear();
+    y_values.clear();
+    calibrationTimer->start(calibrationDuration);
+    connect(sensor, &QAccelerometer::readingChanged, this, &Accelerometer::onCalibrationReadingChanged);
+}
+```
+calibration: Starts the sensor and prepares for calibration by clearing previous values and starting a timer for the calibration duration. from this time we connect `onCalibrationReadingChanged` function to the `readingChanged` signal. it says that for the calibration process we will manually emit reading data signal to read data form sensor in time intervals. instead, the `readingChanged` signal will be authomatically emited whenver a new data is available to read on sensor. 
+```cpp
+void Accelerometer::onCalibrationReadingChanged()
+{
+    QAccelerometerReading *reading = sensor->reading();
+    if (reading)
+    {
+        x_values.append(reading->x());
+        y_values.append(reading->y());
+    }
+    else
+    {
+        qDebug() << "No reading available.";
+    }
+}
+```
+this function will be called whenever `readingChanged` signal is emmited. then it will read data from the sensor and append current accelerations to array of acceleraion's history. (we will need these acceleration during the `calibrationDuration` in order to calculate bias)
+```cpp
+void Accelerometer::onCalibrationFinished()
+{
+    sensor->stop();
+    calibrationTimer->stop();
+    disconnect(sensor, &QAccelerometer::readingChanged, this, &Accelerometer::onCalibrationReadingChanged);
+
+    double x_sum = 0.0;
+    double y_sum = 0.0;
+
+    for (double x : x_values)
+        x_sum += x;
+
+    for (double y : y_values)
+        y_sum += y;
+
+    x_bias = x_sum / x_values.size();
+    y_bias = y_sum / y_values.size();
+
+    QString output = QStringLiteral("Calibration complete\tX bias: %1 Y bias: %2")
+                         .arg(QString::number(x_bias, 'f', 1),
+                              QString::number(y_bias, 'f', 1));
+    qDebug() << "Biases: " + output;
+
+    emit calibrationFinished(output);
+}
+```
+this function will be called when the timer of the calibration is timeout. then we will stop the sensor from reading. and stop the timer as well(because we just want to calibrate single time). then disconnect `readingChanged` signal because henceforward we don't want to read data from sensor whenever new data is available instead we want to read data by time intervals and get samples priadically.<br/>
+in this function we calculate bias by calculating the average of the velocities we have saved in history during the `calibrationDuration`. at the end, we specify the format of output which will be shown on the screen. then we emit `calibrationFinished` signal Indicates that calibration is complete and provides the calibration result. whenever this signal is emmited we will show the output on the screen of our application.
