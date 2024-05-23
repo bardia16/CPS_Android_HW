@@ -339,7 +339,7 @@ when we create a QtQuick project it will automatically generate this file with i
 ```
 These lines of code are registering custom C++ classes with the QML type system. This allows these classes to be used directly in QML files. <br/>
 Template Parameter (<T>): This specifies the C++ class we are registering. For example, `Accelerometer`, `Gyroscope`, and `MovementDatabase` in our case. <br/>
-"com.example": This is the URI (Uniform Resource Identifier) of the module in which the type is registered. It acts like a namespace or module name in QML. As you see it is imported in the .QML file. <br/>
+"com.example": This is the URI (Uniform Resource Identifier) of the module in which the type is registered. It acts like a namespace or module name in QML. As you see it is imported into .QML file. <br/>
 1 and 0 are used for the version number of the module, the major and minor part. in this case, our version will be 1.0. <br/>
 last parameter is the name by which the type will be known in QML. by this way we can instantiate and use objects of these types in our .QML file. <br/>
 whenever we make a file (object) and we want to use that object in our QML file, by this way we can add it to our created module ("com.example").
@@ -347,7 +347,7 @@ whenever we make a file (object) and we want to use that object in our QML file,
     MovementDatabase movementDatabase;
     engine.rootContext()->setContextProperty("movementDatabase", &movementDatabase);
 ```
-This makes the instance accessible in QML files under the name `movementDatabase`. later we will observe and explain about `movementDatabase`. 
+This makes the instance accessible in QML files under the name `movementDatabase`. Later we will observe and explain `movementDatabase`. 
 
 ## Accelerometer class
 Accelerometer class is designed to interface with a QML application to handle accelerometer sensor readings. It provides functionality for starting and stopping the sensor, processing the sensor readings, applying a Kalman filter for noise reduction, handling calibration, and emitting relevant signals for use in a QML application. Here we explain each part of this class in detail:
@@ -367,7 +367,7 @@ Accelerometer::Accelerometer(QObject *parent) : QObject(parent), x_bias(0.0), y_
 here we initialize member variables, including bias, Kalman filter, and velocities.
 the reason that we have bias is that when we do calibration we check the base state of velocity of the cellphone. and we name this initial state as bias and when we want to calculate new velocities we should consider this bias as well. Kalman filter is for noise reduction. we will explain its algorithm later. but briefly, it reduce the noise by choosing to consider and rely more on the older data or newer ones. In this way, sudden short changes in velocity won't affect the result. for the velocity we have 3 kinds, one for x direction and the other for y direction and one of them is the general velocity. <br/>
 these velocities will be calculated based on the acceleration and time by the formula: $ a * t = delta v $ and we need to add it to the previous velocity to reach the new velocity. 
-these velocities will be updated after each time intervals. <br/>
+these velocities will be updated after each time interval. <br/>
 then we make an instance of the available `QAccelerometer` sensor object. <br/>
 we have two types of timers. One is for sampling intervals (timer) and the other (calibrationTimer) is for handling calibration. then we connect the timer signal to `onSensorReadingChanged` function. so whenever a timer reaches a specified time(we have specified the time intervals in this file in start method), and timeout occurs this function will be called. <br/>
 also, we connect the `calibrationTimer` signal to  `onCalibrationFinished` function. so whenever this timer reaches a specified time(we have specified this time duration in calibration method), and timeout occurs this function will be called. <br/>
@@ -460,7 +460,7 @@ void Accelerometer::onSensorReadingChanged()
 }
 ```
 this function will be called after each time interval, first, we read the data from the accelerometer sensor. if there is data to read we do the following steps otherwise we log the appropriate message indicating that we have no data to read. then we extract the velocity of x and y from the read data. and update them by applying the Kalman algorithm for noise reduction. <br/>
-we have a threshold for acceleration and whenever we are less than that threshold we consider the acceleration as zero. the reason is that to set small values to zero to handle sensor noise. we've determined this variable by trial and error. 
+we have a threshold for acceleration and whenever we are less than that threshold we consider the acceleration as zero. the reason is to set small values to zero to handle sensor noise. we've determined this variable by trial and error. 
 so we check if the acceleration is less than that threshold or not. if not, we apply bias and reach the actual acceleration. 
 ```cpp
         if (x == 0 && y == 0) // frictional accel
@@ -487,8 +487,8 @@ here we update our velocities in both directions. To do this, we multiply the cu
 ```
 here we can see the format of the output that will be shown on the screen of our application which shows the accelerations and velocities.
 at the end, we emit signals with the updated values for use in the QML frontend.
-we will disscuss these signals later. but briefly `newAcceleration` signal will handle our movements (check if we have finished one movement or not yet in order to add it to our movement database). the connection of this signal can be seen in .QML file. <br/>
-`readingUpdated` signal is emited to handle what should be shown on the screen. 
+we will discuss these signals later. but briefly `newAcceleration` signal will handle our movements (check if we have finished one movement or not yet in order to add it to our movement database). the connection of this signal can be seen in .QML file. <br/>
+`readingUpdated` signal is emitted to handle what should be shown on the screen. 
 ### Frictional Acceleration Calculation
 frictionalAccel: Simulates frictional deceleration on the velocities to gradually bring them to zero when no acceleration is detected.
 ```cpp
@@ -538,7 +538,7 @@ void Accelerometer::calibration()
     connect(sensor, &QAccelerometer::readingChanged, this, &Accelerometer::onCalibrationReadingChanged);
 }
 ```
-calibration: Starts the sensor and prepares for calibration by clearing previous values and starting a timer for the calibration duration. from this time we connect `onCalibrationReadingChanged` function to the `readingChanged` signal. it says that for the calibration process we will manually emit reading data signal to read data form sensor in time intervals. instead, the `readingChanged` signal will be authomatically emited whenever a new data is available to read on sensor. 
+calibration: Starts the sensor and prepares for calibration by clearing previous values and starting a timer for the calibration duration. from this time we connect `onCalibrationReadingChanged` function to the `readingChanged` signal. it says that for the calibration process, we will manually emit a reading data signal to read data from the sensor in time intervals. instead, the `readingChanged` signal will be automatically emitted whenever new data is available to read on the sensor. 
 ```cpp
 void Accelerometer::onCalibrationReadingChanged()
 {
@@ -554,7 +554,7 @@ void Accelerometer::onCalibrationReadingChanged()
     }
 }
 ```
-this function will be called whenever `readingChanged` signal is emmited. then it will read data from the sensor and append current accelerations to array of acceleraion's history. (we will need these acceleration during the `calibrationDuration` in order to calculate bias)
+this function will be called whenever `readingChanged` signal is emitted. then it will read data from the sensor and append current accelerations to an array of accelerator's history. (we will need these accelerations during the `calibrationDuration` to calculate bias)
 ```cpp
 void Accelerometer::onCalibrationFinished()
 {
@@ -582,8 +582,8 @@ void Accelerometer::onCalibrationFinished()
     emit calibrationFinished(output);
 }
 ```
-this function will be called when the timer of the calibration is timeout. then we will stop the sensor from reading. and stop the timer as well(because we just want to calibrate single time). then disconnect `readingChanged` signal because henceforward we don't want to read data from sensor whenever new data is available instead we want to read data by time intervals and get samples priadically.<br/>
-in this function we calculate bias by calculating the average of the velocities we have saved in history during the `calibrationDuration`. at the end, we specify the format of output which will be shown on the screen. then we emit `calibrationFinished` signal Indicates that calibration is complete and provides the calibration result. whenever this signal is emmited we will show the output on the screen of our application.
+this function will be called when the timer of the calibration is timeout. then we will stop the sensor from reading. and stop the timer as well(because we just want to calibrate a single time). then disconnect `readingChanged` signal because henceforward we don't want to read data from the sensor whenever new data is available instead we want to read data by time intervals and get samples periodically.<br/>
+in this function, we calculate bias by calculating the average of the velocities we have saved in history during the `calibrationDuration`. at the end, we specify the format of output which will be shown on the screen. then we emit `calibrationFinished` signal indicates that calibration is complete and provides the calibration result. whenever this signal is emitted we will show the output on the screen of our application.
 
 ## Gyroscope class
 The Gyroscope class in the provided code is designed to handle the operations of a gyroscope sensor within a Qt application. The class uses the `QGyroscope` sensor to read gyroscope data, applies Kalman filtering to the sensor data, performs calibration to determine sensor biases, and emits signals for use in the QML frontend.
@@ -601,12 +601,12 @@ Gyroscope::Gyroscope(QObject *parent)
 ```
 here we initialize member variables, including bias, Kalman filter, and the angle.<br/>
 note that we consider just one angle in z direction.<br/>
-the reason that we have bias is that when we do calibration we check the base state of angle of the cellphone. and we name this initial state as bias and when we want to calculate new angle we should consider this bias as well. Kalman filter is for noise reduction. we will explain its algorithm later.<br/>
-the angle will be updated after each time intervals. <br/>
+the reason that we have bias is that when we do calibration we check the base state of the angle of the cellphone. and we name this initial state as bias and when we want to calculate a new angle we should consider this bias as well. Kalman filter is for noise reduction. we will explain its algorithm later.<br/>
+the angle will be updated after each time interval. <br/>
 then we make an instance of the available `QGyroscope` sensor object. <br/>
 here like Accelormeter, we have two types of timers. One is for sampling intervals (timer) and the other (calibrationTimer) is for handling calibration. then we connect the timer signal to `onSensorReadingChanged` function. so whenever a timer reaches a specified time(we have specified the time intervals in this file in start method), and timeout occurs this function will be called. <br/>
 also, we connect the `calibrationTimer` signal to  `onCalibrationFinished` function. so whenever this timer reaches a specified time(we have specified this time duration in calibration method), and timeout occurs, this function will be called. <br/>
-the reason that we have `calibrationTimer` is that for calculating the initial bias we should get many samples from the sensors in one period of time and calculate the average. thus for indicating the duration of this period we need to set a `calibrationTimer`.
+the reason that we have `calibrationTimer` is that for calculating the initial bias we should get many samples from the sensors in one period of time and calculate the average. thus to indicate the duration of this period we need to set a `calibrationTimer`.
 
 ### Destructor
 ```cpp
@@ -657,7 +657,7 @@ void Gyroscope::calibration()
     connect(sensor, &QGyroscope::readingChanged, this, &Gyroscope::onCalibrationReadingChanged);
 }
 ```
-calibration: Starts the sensor and prepares for calibration by clearing previous values and starting a timer for the calibration duration. from this time we connect `onCalibrationReadingChanged` function to the `readingChanged` signal. it says that for the calibration process we will manually emit reading data signal to read data form sensor in time intervals. instead, the `readingChanged` signal will be authomatically emited whenever a new data is available to read on sensor. 
+calibration: Starts the sensor and prepares for calibration by clearing previous values and starting a timer for the calibration duration. from this time we connect `onCalibrationReadingChanged` function to the `readingChanged` signal. it says that for the calibration process, we will manually emit a reading data signal to read data from the sensor in time intervals. instead, the `readingChanged` signal will be automatically emitted whenever new data is available to read on the sensor. 
 ```cpp
 void Gyroscope::onCalibrationReadingChanged()
 {
@@ -672,7 +672,7 @@ void Gyroscope::onCalibrationReadingChanged()
     }
 }
 ```
-this function will be called whenever `readingChanged` signal is emited. then it will read data from the sensor and append current angular velocity to array of angular velociti's history. (we will need these angles during the `calibrationDuration` in order to calculate bias)
+this function will be called whenever `readingChanged` signal is emitted. then it will read data from the sensor and append current angular velocity to an array of angular velocities history. (we will need these angles during the `calibrationDuration` to calculate bias)
 ```cpp
 void Gyroscope::onCalibrationFinished()
 {
@@ -693,8 +693,8 @@ void Gyroscope::onCalibrationFinished()
     emit calibrationFinished(output);
 }
 ```
-this function will be called when the timer of the calibration is timeout. then we will stop the sensor from reading. and stop the timer as well(because we just want to calibrate single time). then disconnect `readingChanged` signal because henceforward we don't want to read data from sensor whenever new data is available instead we want to read data by time intervals and get samples priadically.<br/>
-in this function we calculate bias by calculating the average of the angular velocities we have saved in history during the `calibrationDuration`. at the end, we specify the format of output which will be shown on the screen. then we emit `calibrationFinished` signal indicates that calibration is complete and provides the calibration result. whenever this signal is emited we will show the output on the screen of our application.
+this function will be called when the timer of the calibration is timeout. then we will stop the sensor from reading. and stop the timer as well(because we just want to calibrate a single time). then disconnect `readingChanged` signal because henceforward we don't want to read data from the sensor whenever new data is available instead we want to read data by time intervals and get samples periodically.<br/>
+in this function, we calculate bias by calculating the average of the angular velocities we have saved in history during the `calibrationDuration`. at the end, we specify the format of output which will be shown on the screen. then we emit `calibrationFinished` signal indicates that calibration is complete and provides the calibration result. whenever this signal is emitted we will show the output on the screen of our application.
 
 ### Sensor Reading Handling
 ```cpp
@@ -746,14 +746,14 @@ void Gyroscope::onSensorReadingChanged()
     }
 }
 ```
-this function will be called after each time interval, first, we read the data from the gyroscope sensor. if there is data to read we do the following steps otherwise we log the appropriate message indicating that we have no data to read. then we extract the angular velocity in z direction from the read data. and update it by applying the Kalman algorithm for noise reduction. <br/>
+this function will be called after each time interval, first, we read the data from the gyroscope sensor. if there is data to read we do the following steps otherwise we log the appropriate message indicating that we have no data to read. then we extract the angular velocity in the z-direction from the read data. and update it by applying the Kalman algorithm for noise reduction. <br/>
 then we apply bias. and then check if our current angular velocity is less than a threshold or not.
-we have a threshold for angular velocity and whenever we are less than that threshold we consider the velocity as zero. the reason is that to set small values to zero to handle sensor noise. we've determined this threshold variable by trial and error. </br>
+we have a threshold for angular velocity and whenever we are less than that threshold we consider the velocity as zero. the reason is to set small values to zero to handle sensor noise. we've determined this threshold variable by trial and error. </br>
 ```cpp
         double angleChange = alpha * 0.01;
         currentAngle += angleChange;
 ```
-here we update our angular velocity. To do this, we multiply the current angular velocity by time intervals to reach delta v. Then we add it to previous angular velocity.
+here we update our angular velocity. To do this, we multiply the current angular velocity by time intervals to reach delta v. Then we add it to the previous angular velocity.
 
 ```cpp
         if (currentAngle >= 360.0) currentAngle -= 360.0;
@@ -771,7 +771,7 @@ here we update our angular velocity. To do this, we multiply the current angular
             normalizedAngle = 0.0;
         }
 ```
-here we normalize the angel. our valid angels are 0, 90, 180, -90. so we try to normalize the angle to reach these valid angels.
+here we normalize the angel. our valid angels are 0, 90, 180, -90. so we try to normalize the angle to reach these valid angles.
 ```cpp
         QString output = QStringLiteral("Alpha: %1").arg(QString::number(normalizedAngle, 'f', 2));
 
@@ -780,8 +780,8 @@ here we normalize the angel. our valid angels are 0, 90, 180, -90. so we try to 
 ```
 here we can see the format of the output that will be shown on the screen of our application which shows the angle.
 at the end, we emit signals with the updated values for use in the QML frontend.
-we will disscuss these signals later. but briefly `newRotation` signal will handle our movements (check if we have finished one movement or not yet in order to add it to our movement database). the connection of this signal can be seen in .QML file. <br/>
-`readingUpdated` signal is emited to handle what should be shown on the screen. 
+we will discuss these signals later. but briefly `newRotation` signal will handle our movements (check if we have finished one movement or not yet to add it to our movement database). the connection of this signal can be seen in .QML file. <br/>
+`readingUpdated` signal is emitted to handle what should be shown on the screen. 
 
 ### Reset Method
 ```cpp
@@ -794,3 +794,236 @@ void Gyroscope::reset()
 }
 ```
 reset: Resets the current angle to 0 and logs the action.
+## Movement class
+The Movement class in the provided code is designed to handle movement calculations based on accelerometer data and angular changes. It computes distances traveled in X and Y directions, updates the current position and angle, and determines the movement direction.
+### Constructor
+```cpp
+Movement::Movement(QObject *parent)
+    : QObject(parent), sampleInterval(0.01), currentAngle(0.0) // assuming a sample interval of 0.05 seconds
+{
+}
+```
+this constructor initializes member variables including the sample interval and the current angle. it must have the attribute of `samleInterval` the reason is that we need it to calculate the traveled distance.
+### Adding Acceleration and Angle Data
+```cpp
+void Movement::addAcceleration(double x, double y)
+{
+    accelerations.append(QVector3D(x, y, 0.0));
+}
+
+void Movement::addAngleChange(double alpha)
+{
+    angleChanges.append(alpha);
+    currentAngle = alpha;
+}
+```
+- addAcceleration: Adds a new acceleration vector to the `accelerations` list. we need to save acceleration in each time interval because we need them to calculate the traveled distance.
+- addAngleChange: Adds a new angular change to the `angleChanges` list and updates the current angle (`currentAngle`).
+
+### Distance Calculation
+```cpp
+qreal Movement::calculateDistanceTraveled() const
+{
+    qreal totalDistance = 0.0;
+    qreal velocityX = 0.0;
+    qreal velocityY = 0.0;
+    qreal previousVelocityX = 0.0;
+    qreal previousVelocityY = 0.0;
+    for (const QVector3D &acceleration : accelerations) {
+        velocityX += acceleration.x() * sampleInterval;
+        velocityY += acceleration.y() * sampleInterval;
+
+        qreal averageVelocityX = (previousVelocityX + velocityX) / 2;
+        qreal averageVelocityY = (previousVelocityY + velocityY) / 2;
+
+        qreal distanceX = averageVelocityX * sampleInterval;
+        qreal distanceY = averageVelocityY * sampleInterval;
+
+        totalDistance += std::sqrt(distanceX * distanceX + distanceY * distanceY);
+
+        previousVelocityX = velocityX;
+        previousVelocityY = velocityY;
+    }
+    //qDebug() << totalDistance;
+    return totalDistance;
+}
+```
+in this function, we want to calculate the distance we have traveled till now in one movement. To do this we use this formula: $` ((v1 + v2)/2)*t $  in this formula we assume that acceleration is constant in one sampling interval.<br/>
+this function does these steps:
+- Iterates over each acceleration vector, updating the velocities: from the beginning of the movement start to calculate what a velocity is in each time interval.
+- Calculates the distance in each direction by the mentioned formula.
+- Sums up the distances to get the total distance traveled. (the total distance is calculated by the formula: $`\sqrt{x^2+y^2}$
+- update the previous velocity with the current one and then go through another iteration.
+### Setting Start Position and Angle
+```cpp
+void Movement::setStartPosition(qreal x, qreal y)
+{
+    startPosition = QVector3D(x, y, 0.0);
+}
+
+void Movement::setStartAngle(qreal angle)
+{
+    currentAngle = angle;
+}
+```
+Sets the starting position and angle of the movement. we need them because when a new movement is created it will get the start position from the last position of the previous movement. 
+- this function is called when a new movement is added to our `movementDatabase`.
+### Distance Calculation in X and Y Directions separately
+```cpp
+qreal Movement::calculateDistanceTraveledX() const
+{
+    qreal totalDistance = 0.0;
+    qreal velocityX = 0.0;
+    qreal previousVelocityX = 0.0;
+    for (const QVector3D &acceleration : accelerations) {
+        velocityX += acceleration.x() * sampleInterval;
+
+        qreal averageVelocityX = (previousVelocityX + velocityX) / 2;
+
+        qreal distanceX = averageVelocityX * sampleInterval;
+
+        totalDistance += distanceX;
+
+        previousVelocityX = velocityX;
+    }
+    return totalDistance;
+}
+
+qreal Movement::calculateDistanceTraveledY() const
+{
+    qreal totalDistance = 0.0;
+    qreal velocityY = 0.0;
+    qreal previousVelocityY = 0.0;
+    for (const QVector3D &acceleration : accelerations) {
+        velocityY += acceleration.y() * sampleInterval;
+
+        qreal averageVelocityY = (previousVelocityY + velocityY) / 2;
+
+        qreal distanceY = averageVelocityY * sampleInterval;
+
+        totalDistance += distanceY;
+
+        previousVelocityY = velocityY;
+    }
+    return totalDistance;
+}
+```
+in these functions, we want to calculate the distance in the x and y direction separately which we have traveled till now in one movement. To do this we use this formula: $` ((v1 + v2)/2)*t $ <br/>
+
+### Current Position Calculation
+```cpp
+QVector3D Movement::getCurrentPosition() const
+{
+    qreal distanceTraveledX = calculateDistanceTraveledX();
+    qreal distanceTraveledY = calculateDistanceTraveledY();
+    QVector3D currentPosition = startPosition;
+    if (currentAngle == 0)
+    {
+        currentPosition.setX(startPosition.x() + distanceTraveledX);
+        currentPosition.setY(startPosition.y() + distanceTraveledY);
+    }
+    else if (currentAngle == 90)
+    {
+        currentPosition.setX(startPosition.x() - distanceTraveledY);
+        currentPosition.setY(startPosition.y() + distanceTraveledX);
+    }
+    else if (currentAngle == -90)
+    {
+        currentPosition.setX(startPosition.x() + distanceTraveledY);
+        currentPosition.setY(startPosition.y() - distanceTraveledX);
+    }
+    else if (currentAngle == 180)
+    {
+        currentPosition.setX(startPosition.x() - distanceTraveledX);
+        currentPosition.setY(startPosition.y() - distanceTraveledY);
+    }
+
+    currentPosition.setZ(0.0);
+    qDebug() << "New starting position:";
+    qDebug() << currentPosition;
+    return currentPosition;
+}
+```
+- Calculates the current position based on the starting position, distance traveled in X and Y directions, and the current angle.
+- Adjusts the X and Y coordinates based on the current angle.
+- Logs and returns the new position.
+  ** We should note that when for example our angle is 90, when we push the cellphone to the right it gets negative acceleration in the y direction not positive acceleration in the x direction! so we should calculate the traveled distance in the y direction and subtract it from our x position to reach the current position. for each of these conditions, we have analyzed the attitude and accordingly applied this scenario.
+### Current Angle
+```cpp
+double Movement::getCurrentAngle() const
+{
+    return currentAngle;
+}
+```
+Returns the current angle.
+### Finding Direction
+this function is used to determine the direction of our movement. 
+```cpp
+void Movement::findDirection()
+{
+    qreal distanceX = calculateDistanceTraveledX();
+    qreal distanceY = calculateDistanceTraveledY();
+    bool main_direction_is_X = std::abs(distanceX) > std::abs(distanceY);
+    qreal angle = getCurrentAngle();
+    QString direction = "Not assigned";
+    //logic
+
+    if(main_direction_is_X && distanceX > 0)
+    {
+        if(angle == 0)
+            direction = "Right";
+        else if(angle == 90)
+            direction = "Up";
+        else if(angle == -90)
+            direction = "Bottom";
+        else if(angle == 180)
+            direction = "Left";
+    }
+    else if(main_direction_is_X && distanceX < 0)
+    {
+        if(angle == 0)
+            direction = "Left";
+        else if(angle == 90)
+            direction = "Bottom";
+        else if(angle == -90)
+            direction = "Up";
+        else if(angle == 180)
+            direction = "Right";
+    }
+    if(!main_direction_is_X && distanceY > 0)
+    {
+        if(angle == 0)
+            direction = "Up";
+        else if(angle == 90)
+            direction = "Left";
+        else if(angle == -90)
+            direction = "Right";
+        else if(angle == 180)
+            direction = "Down";
+    }
+    else if(!main_direction_is_X && distanceY < 0)
+    {
+        if(angle == 0)
+            direction = "Down";
+        else if(angle == 90)
+            direction = "Right";
+        else if(angle == -90)
+            direction = "Left";
+        else if(angle == 180)
+            direction = "Up";
+    }
+    currentDirection = direction;
+}
+```
+findDirection: Determines the main direction of movement based on the distance traveled in X and Y directions and the current angle.
+- Compares distances to determine if the main direction is along the X or Y.
+- Uses the current angle to determine the correct direction string ("Right", "Left", "Up", "Down").
+- Sets `currentDirection` based on these calculations.
+### Getting Direction
+```cpp
+QString Movement::getDirection() const
+{
+    return currentDirection;
+}
+```
+Returns the current direction string.
