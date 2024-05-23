@@ -1027,3 +1027,117 @@ QString Movement::getDirection() const
 }
 ```
 Returns the current direction string.
+## movementDatabase class
+this class is responsible for managing and tracking movements. It processes incoming acceleration and angle data, manages movements, and handles the creation of new movements and patterns.
+### Constructor
+```cpp
+#define min_distance 0.2
+MovementDatabase::MovementDatabase(QObject *parent)
+    : QObject(parent), currentMovement(new Movement(this))
+{
+    m_movements.append(currentMovement);
+}
+```
+on the top, we defined a minimum distance threshold (min_distance) of 0.2 units for creating a new movement.
+then we initialize the `MovementDatabase` object.
+then Create a new Movement object (`currentMovement`) and add it to the list of movements (`m_movements`).
+
+### Handling New Acceleration
+```cpp
+void MovementDatabase::handleNewAcceleration(double x, double y, double velocityX, double velocityY, double xBias, double yBias)
+{
+    if (std::abs(x) <= min_acceleration && std::abs(y) <= min_acceleration && (std::abs(velocityX) <= min_velocity && std::abs(velocityY) <= min_velocity))
+    {
+        if(currentMovement->calculateDistanceTraveled() >= min_distance)
+        {
+            createNewMovement();
+            qDebug() << "Creating new movements";
+        }
+        else if(currentMovement->calculateDistanceTraveled() < min_distance && currentMovement->calculateDistanceTraveled() > 0.0)
+        {
+            currentMovement->accelerations.clear();
+            currentMovement->angleChanges.clear(); // no need to store because the movement was rotation
+            qDebug() << "Movement cleared";
+        }
+
+    }
+
+    if (std::abs(x) >= min_acceleration || std::abs(y) >= min_acceleration) {
+        currentMovement->addAcceleration(x, y);
+    }
+    //qDebug() << m_movements;
+}
+```
+this function checks if a movement is finished or not yet. one term is that the acceleration in both the x and y directions should be zero. another term is that the velocity in both directions should be zero too. but here instead of zero, we consider a min threshold and whenever those mentioned parameters are less than that threshold we conclude that one movement is finished. now this movement can be angular or distance. so we check if the traveled distance is more than a min threshold for distance, then we have a new movement for distance so we create and save a new movement. otherwise, we have angular movement but there is no need to store it because the movement was rotation. <br/>
+otherwise, if we have acceleration more than that threshold, we will add it to the vector of accelerations of the current unfinished movement. 
+### Handling New Angle
+```cpp
+void MovementDatabase::handleNewAngle(double alpha)
+{
+    currentMovement->addAngleChange(alpha);
+    emit angleUpdated(currentMovement->getCurrentAngle());
+}
+```
+- Adds the angle change to the current movement (add it to the vector of angular velocities of this unfinished movement).
+- Emits a signal to update the angle by the current angle.
+###  Resetting the Database
+```cpp
+void MovementDatabase::reset()
+{
+    currentMovement = new Movement(this);
+    m_movements.clear();
+    m_movements.append(currentMovement);
+    //emit movementsUpdated(0.0, 0.0, 0.0, "Reset");
+    qDebug() << "MovementDatabase reset.";
+}
+```
+- Resets the movement database.
+- Clears the list of movements and creates a new current movement as just initialization.
+
+### Creating a New Movement
+```cpp
+void MovementDatabase::createNewMovement()
+{
+    QVector3D lastPosition;
+    qreal lastAngle;
+    Movement* newMovement = new Movement(this);
+    Movement* lastMovement = m_movements.last();
+    newMovement->setStartPosition(0.0, 0.0);
+    newMovement->setStartAngle(0.0);
+    lastPosition = QVector3D(0.0, 0.0, 0.0);
+    lastAngle = 0.0;
+    if (!m_movements.isEmpty()) {
+        lastMovement->findDirection();
+        lastPosition = lastMovement->getCurrentPosition();
+        lastAngle = lastMovement->getCurrentAngle();
+        newMovement->setStartPosition(lastPosition.x(), lastPosition.y());
+        newMovement->setStartAngle(lastAngle);
+    }
+    emit movementsUpdated(lastPosition.x(), lastPosition.y(), lastAngle, lastMovement->getDirection());
+    m_movements.append(newMovement);
+    currentMovement = newMovement;
+}
+```
+- Creates a new movement and sets its starting position and angle.
+- Retrieves the position and angle of the last movement to set as the start for the new movement.
+- Emits a signal to update movement data.
+- Adds the new movement to the list and sets it as the current movement.
+### Creating a New Pattern
+```cpp
+void MovementDatabase::createNewPattern(bool isAttempt)
+{
+    // Create a new Pattern instance with the current list of movements
+    Pattern* pattern = new Pattern(m_movements, this);
+
+    if(!isAttempt)
+        emit newPattern(pattern);
+    else
+        emit newAttempt(pattern);
+
+    // Optionally, clear the current list of movements if needed
+    reset();
+}
+```
+- Creates a new Pattern from the list of movements.
+- Depending on whether it is an attempt, emits the appropriate signal (newPattern or newAttempt).
+- Resets the movement database.
