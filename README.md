@@ -221,7 +221,7 @@ each label has these properties:
   - accelText: this text shows the acceleration and will be updated by each time interval.
   - patterns: this is just a label for the ScrolView part. 
 in the following picture, you can see each label and its corresponding text.
-![System Operation Demonstration](CPS_Android_HW/Pics/screenshot_showLabels.gif)
+![Alt text](Pics/screenshot_showLabels.gif)
 
 #### ScrollView
 A ScrollView is a container that provides a scrollable area for its child elements, which is useful when you have content that exceeds the available space.
