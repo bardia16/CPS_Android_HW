@@ -1229,3 +1229,76 @@ QJsonArray Pattern::toJson() const
 }
 ```
 this function is used to write and save our pattern in JSON format. we have a `movementJson` object which consists of `startJson`(contains x and y of the start position) and `endJson`(contains the last x and y position) objects. and also it have direction and angle fields too. 
+## patterndatabase class
+this class is designed to manage a collection of Pattern objects. It provides functionality to add new patterns, authenticate patterns against stored patterns, and save the patterns to a JSON file.
+### Constructor
+```cpp
+PatternDatabase::PatternDatabase(QObject *parent)
+    : QObject(parent)
+{
+}
+```
+Initializes a `PatternDatabase` object.
+
+### Adding a Pattern
+```cpp
+void PatternDatabase::addPattern(Pattern *pattern)
+{
+    qDebug() << "Pattern created";
+    patterns.append(pattern);
+}
+```
+we have database of all patterns and here we add a pattern to that database.
+### Authenticating a Pattern
+```cpp
+void PatternDatabase::authenticatePattern(Pattern *pattern)
+{
+    QString status = "failed";
+    for (Pattern *storedPattern : patterns) {
+        if (storedPattern->authenticate(pattern)) {
+            status = "succeed";
+        }
+    }
+    QString output = QStringLiteral("Authentication %1").arg(status);
+    emit authenticationResult(output);
+}
+```
+`authenticatePattern` method compares a given Pattern object against all stored patterns in the patterns list:
+- Iterates through the stored patterns:
+   - If a stored pattern matches the given pattern (using the authenticate method of Pattern), set the status to "succeed". which means we are successfully authenticated.
+- Shows the result status of authentication on the screen of our application.
+- Emits `authenticationResult` signal which indicates that the result of our authentication is ready to be shown on the screen.
+
+### Saving Patterns to JSON
+```cpp
+void PatternDatabase::savePatternsToJson(const QString &fileName)
+{
+    QJsonArray jsonArray;
+
+    for (Pattern *pattern : patterns) {
+        jsonArray.append(pattern->toJson());
+    }
+
+    QJsonDocument jsonDoc(jsonArray);
+
+    QString filePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/" + fileName;
+    QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning() << "Couldn't open save file:" << filePath;
+        return;
+    }
+
+    file.write(jsonDoc.toJson(QJsonDocument::Indented));
+    file.close();
+    qDebug() << "File saved to:" << filePath;
+}
+```
+this method saves all stored patterns to a JSON file.
+here we create a QJsonArray to hold the JSON representation of all patterns. then iterate through the stored patterns and appends their JSON representation (obtained by `toJson` method of Pattern) to the jsonArray.
+then we create a `QJsonDocument` from the jsonArray.
+we have created this file in order to save the json format of our patterns in it. 
