@@ -221,7 +221,8 @@ each label has these properties:
   - accelText: this text shows the acceleration and will be updated by each time interval.
   - patterns: this is just a label for the ScrolView part. 
 in the following picture, you can see each label and its corresponding text.
-![Alt text](Pics/screenshot_showLabels.gif)
+
+![Alt text](Pics/screenshot_showLabels.jpg)
 
 #### ScrollView
 A ScrollView is a container that provides a scrollable area for its child elements, which is useful when you have content that exceeds the available space.
@@ -1347,3 +1348,26 @@ of software-based sensors. <br/>
 <br/>
 in this project, we just had two sensors: an Accelerometer and a Gyroscope which both are hardware-based sensors.
 4. f
+
+
+## Test Application
+
+### Up and Left without rotation 
+
+![Alt text](Pics/screenshot_1.jpg)
+
+![Alt text](Pics/screenshot_2.jpg)
+
+![Alt text](Pics/screenshot_3.jpg)
+
+![Alt text](Pics/screenshot_4.jpg)
+
+![Alt text](Pics/screenshot_5.jpg)
+
+![Alt text](Pics/screenshot_6.jpg)
+
+![Alt text](Pics/screenshot_7.jpg)
+
+![Alt text](Pics/screenshot_8.jpg)
+
+### Up and right with rotation
