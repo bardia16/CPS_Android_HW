@@ -221,7 +221,7 @@ each label has these properties:
   - accelText: this text shows the acceleration and will be updated by each time interval.
   - patterns: this is just a label for the ScrolView part. 
 in the following picture, you can see each label and its corresponding text.
-
+![System Operation Demonstration](CA1/Pics/screenshot_showLabels.gif)
 
 #### ScrollView
 A ScrollView is a container that provides a scrollable area for its child elements, which is useful when you have content that exceeds the available space.
@@ -248,7 +248,7 @@ each `scrollView` has these properties:
             }
         }
 ```
-in the following picture, you can see the `scrollView` and its inside text. Whenever one pattern is captured this text will be updated and one pattern will be appended.
+in the above picture, you have seen the `scrollView` and its inside text. Whenever one pattern is captured this text will be updated and one pattern will be appended.
 
 #### Button 
 A Button is an interactive component that users can click to trigger actions.
