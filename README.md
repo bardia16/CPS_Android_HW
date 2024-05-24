@@ -1337,8 +1337,46 @@ then we create a `QJsonDocument` from the jsonArray.
 we have created this file in order to save the json format of our patterns in it. 
 
 ## Questions and Answers
-1. f
-2. When determining the best sampling interval for reading values from an accelerometer and a gyroscope, it's important to consider the nature and sensitivity of each sensor.
+1. Collect device data and perform Trace and Profile operations using the Perfetto tool. According to the guide of this tool and after collecting the data, answer the following questions.
+- From the time a request to read data is given to a sensor until the data is received, what happened at the level of the operating system and how much time has passed? 
+  
+  ![Alt text](Pics/QP_3.jpg)
+  ![Alt text](Pics/QP_4.jpg)
+  ![Alt text](Pics/QP_5.jpg)
+  ![Alt text](Pics/QP_6.jpg)
+  ![Alt text](Pics/QP_7.jpg)
+
+- Compare the time between reading two consecutive data from the sensor in Perfetto with the sampling period you configured in your code.
+  
+  ![Alt text](Pics/QP_8.jpg)
+  ![Alt text](Pics/QP_9.jpg)
+  ![Alt text](Pics/QP_7.jpg)
+  
+- In system calls, is there a conflict (waiting busy for a Thread until another Thread finishes its work) between processes (for example, using the library related to graphics) and updating the sensors? Justify your answer.
+  
+  ![Alt text](Pics/QP_10.jpg)
+  ![Alt text](Pics/QP_11.jpg)
+  ![Alt text](Pics/QP_12.jpg)
+
+
+  
+- Compare the time needed to process sensor data with the time of other CPU processes.
+  ![Alt text](Pics/QP_1.jpg)
+  ![Alt text](Pics/QP_2.jpg)
+  Our program, org.qtproject.example.appQtQuickProject, executed for a total duration of 35 seconds. The breakdown of this runtime is as follows:
+
+    + The main program of appQtQuickProject ran for 7 seconds.
+    + The sensors within the program were active for 0.7 seconds.
+  
+  Analysis of Time Utilization
+  
+  It was observed that nearly 20% of the total execution time was consumed by the main program. The remaining 80% of the time was utilized by operating system (OS) tasks. This indicates a significant amount of time being spent on OS-related operations rather than the actual program execution.
+  
+  Given that the phone was in flight mode and no other applications were running, the expectation was that the majority of the processing time would be dedicated to our program. However, the data shows that only 20% of the time was dedicated to our program, suggesting inefficiencies in how our program runs on the operating system.
+  
+  While our program ran successfully for the specified duration, the analysis highlights that a significant portion of the time was lost to OS tasks. This inefficiency indicates that our program does not run optimally on the operating system. We will look into ways to optimize our program to enhance performance and reduce the time spent on OS operations.
+
+1. When determining the best sampling interval for reading values from an accelerometer and a gyroscope, it's important to consider the nature and sensitivity of each sensor.
 
 - Accelerometer: The impact of choosing the right sampling interval is more significant for the accelerometer compared to the gyroscope. Here’s why:
 
@@ -1425,3 +1463,4 @@ of software-based sensors. <br/>
 ![Alt text](Pics/screenshot_17.jpg)
 
 ![Alt text](Pics/screenshot_18.jpg)
+
