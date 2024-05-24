@@ -11,8 +11,8 @@ Here we briefly go through the goals we aim to achieve:
 
 ## Challenges
 the challenges we face in the project:
-1. **Sensor Accuracy:**
-2. **Saving the direction:**
+1. **Sensor Accuracy:** The accuracy of sensors (e.g., accelerometers, gyroscopes) used in mobile devices is a crucial factor. These sensors can be influenced by various factors such as hardware quality, calibration, environmental conditions, and the inherent noise in sensor readings. Inaccurate sensor data can lead to incorrect calculations of movement parameters such as distance traveled and changes in direction or angle. we have handled this challenge by implementing Kalman filters to smooth sensor data and reduce the impact of noise and drift.
+2. **Saving the direction:** Calculating and saving the direction of movement based on the current position involves accurately interpreting sensor data and adjusting the position coordinates based on the angle of movement. This process can be complex due to the need to handle different angles correctly and ensure that the calculated position reflects the actual movement direction and distance. (you can see the code related to this challenge in the movement class file.)
 
 ## Project Directory Structure and Contents
 
@@ -97,7 +97,9 @@ whenever this function is called the text of Status label will be updated.
 ```
 whenever this function is called the text of Status label will be conditionally updated. the condition is based on two parameters "gyroCalibrated" and "accelCalibrated", which are status parameters that show whether each sensor is yet calibrated or not.
 
-### Sensor Components:
+### Components:
+here we define componenets and their respective signal handlers to manage the application logic related to motion tracking, pattern storage, and authentication.
+#### Accelerometer
 ```QML
     Accelerometer {
         id: accelerometer
@@ -109,7 +111,13 @@ whenever this function is called the text of Status label will be conditionally 
             checkCalibrationCompletion();
         }
     }
-
+```
+The following parts are just something like `connect` it QT. which connects a signal to a function.
+- `onReadingUpdated: updateAccelText(output)`: This signal handler is triggered whenever new accelerometer readings are available. It calls the `updateAccelText(output)` function to update the UI with the latest accelerometer data.
+- `onNewAcceleration`: This signal handler is triggered when new acceleration data is available. It calls the `handleNewAcceleration` method of the `movementDatabase` object, which check if our movement is finished or not yet.
+- `onCalibrationFinished`: This signal handler is triggered when the accelerometer calibration is completed. It updates the calibration message (accelCalibrationMessage). It then calls `checkCalibrationCompletion()` to check if both the accelerometer and gyroscope have been calibrated.
+#### Gyroscope
+```QML
     Gyroscope {
         id: gyroscope
         onReadingUpdated: updateGyroText(output)
@@ -120,12 +128,35 @@ whenever this function is called the text of Status label will be conditionally 
             checkCalibrationCompletion();
         }
     }
-
+```
+- `onReadingUpdated: updateGyroText(output)`: This signal handler is triggered whenever new gyroscope readings are available. It calls the `updateGyroText(output)` function to update the UI with the latest gyroscope data.
+- `onNewRotation`: This signal handler is triggered when new rotation data is available. It calls the `handleNewAngle` method of the `movementDatabase` object.
+- `onCalibrationFinished`: This signal handler is triggered when the gyroscope calibration is completed. It updates the calibration message. It then calls `checkCalibrationCompletion()` to check if both the accelerometer and gyroscope have been calibrated.
+#### Pattern database
+```QML
+    PatternDatabase {
+        id: patternDatabase
+        onAuthenticationResult: updateStatusLabel(output)
+    }
+```
+- `onAuthenticationResult: updateStatusLabel(output)`: This signal handler is triggered when an authentication result is available. It calls the `updateStatusLabel(output)` function to update the UI with the authentication status. which can be "succeed" or "failed". 
+#### Movement database
+```QML
     MovementDatabase {
         id: movementDatabase
         onMovementsUpdated: addNewMovement(x_pos, y_pos, angle, direction);
+        onNewPattern:
+        {
+            patternDatabase.addPattern(pattern)
+            patternDatabase.savePatternsToJson("Patterns.json")
+        }
+        onNewAttempt: patternDatabase.authenticatePattern(pattern)
     }
 ```
+- `onMovementsUpdated: addNewMovement(x_pos, y_pos, angle, direction)`: This signal handler is triggered when the movement data is updated. It calls the `addNewMovement` function to display the updated movement data in the UI.
+- `onNewPattern`: This signal handler is triggered when a new movement pattern is created. It calls the `addPattern(pattern)` method of the `patternDatabase` object to store the new pattern and then we  save all patterns to a JSON file.
+- `onNewAttempt`: This signal handler is triggered when a new authentication attempt is made. It calls the `authenticatePattern(pattern)` method of the patternDatabase object to authenticate the new pattern against the stored patterns.
+
 ### UI Layout:
 ```QML
     ColumnLayout {
@@ -186,10 +217,11 @@ each label has these properties:
           }
   ```
   - statusText: this text shows the status of Calibration or Authentication.
-  - angleText:
-  - accelText:
+  - angleText: this text shows the angle and will be updated by each time interval.
+  - accelText: this text shows the acceleration and will be updated by each time interval.
   - patterns: this is just a label for the ScrolView part. 
 in the following picture, you can see each label and its corresponding text.
+
 
 #### ScrollView
 A ScrollView is a container that provides a scrollable area for its child elements, which is useful when you have content that exceeds the available space.
@@ -260,6 +292,7 @@ each button has these properties:
                     text = "Start Recording"
                     accelerometer.stop()
                     gyroscope.stop()
+                    movementDatabase.createNewPattern(false)
                 }
             }
         }
@@ -270,17 +303,16 @@ each button has these properties:
             Layout.fillWidth: true
             Layout.preferredHeight: 41
             onClicked: {
-                text = text === "Start Attempt" ? "Stop Attempt" : "Start Attempt"
-            }
-        }
-
-        Button {
-            id: authenticateButton
-            text: qsTr("Authenticate")
-            Layout.fillWidth: true
-            Layout.preferredHeight: 41
-            onClicked: {
-                // Add your authenticate function here
+                if (text === "Start Attempt") {
+                    text = "Stop Attempt"
+                    accelerometer.start()
+                    gyroscope.start()
+                } else {
+                    text = "Start Attempt"
+                    accelerometer.stop()
+                    gyroscope.stop()
+                    movementDatabase.createNewPattern(true)
+                }
             }
         }
 
@@ -297,9 +329,8 @@ each button has these properties:
         }
 ```
 - calibration: when this button is clicked the calibration status will reset.
-- startRecordingButton: the text on this button will shuffled whenever is clicked. if it was "Start Recording" by clicking it will become "Stop Recording". Also, accelerator and gyroscope sensors will start working. then when we click again on this button the text will change back to "Start Recording". Also, the accelerator and gyroscope sensors will stop working.
-- startAttemptButton: 
-- authenticateButton:
+- startRecordingButton: the text on this button will shuffled whenever is clicked. if it was "Start Recording" by clicking it will become "Stop Recording". Also, accelerator and gyroscope sensors will start working. then when we click again on this button the text will change back to "Start Recording". Also, the accelerator and gyroscope sensors will stop working. and new pattern must be saved so we have called `createNewPattern` function. it is given "false" parameter indicates that this pattern should be added as a recoriding one not for authentication.
+- startAttemptButton: the text on this button will shuffled whenever is clicked. if it was "Start Attempt" by clicking it will become "Stop Attempt". Also, accelerator and gyroscope sensors will start working. then when we click again on this button the text will change back to "Start Attempt". Also, the accelerator and gyroscope sensors will stop working. and new pattern must be saved so we have called `createNewPattern` function. but this time it is given "true" parameter indicates that this pattern should be added as an attemp one and should be authenticate and is not for being just recorded.
 - resetButton: when this button is clicked our sensors will reset. and all the movements in `movementDatabase` will be deleted. 
 
 ## main entry to the project
@@ -1138,6 +1169,7 @@ void MovementDatabase::createNewPattern(bool isAttempt)
     reset();
 }
 ```
+one parameter is given to this method which indicates that this method is called by clicking on `startRecordingButton` or `startAttemptButton`.
 - Creates a new Pattern from the list of movements.
 - Depending on whether it is an attempt, emits the appropriate signal (newPattern or newAttempt).
 - Resets the movement database.
