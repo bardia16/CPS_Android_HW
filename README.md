@@ -1340,14 +1340,31 @@ we have created this file in order to save the json format of our patterns in it
 1. f
 2. f
 3. Android devices have built-in sensors. Some of the sensors are hardware-based and some are software-based
-sensors. Hardware-based sensors are physical components built into a
-handset or tablet device and rely directly on the physical hardware of the device to collect sensor data. They derive their data by directly measuring
-specific environmental properties such as acceleration, geomagnetic field strength, or angular change. and are typically embedded within the device and function using electronic components such as accelerometers, gyroscopes, and magnetometers. 
-Software-based sensors are not physical components and derive their data from one or more of the hardware-based sensors. These sensors usually utilize complex software algorithms to integrate data from different hardware sensors and produce useful information. Software-based sensors themselves do not have specific physical components but leverage the output of hardware sensors. The linear acceleration sensor and the gravity sensor are examples
+sensors.
+  - Hardware-based sensors are physical components built into a handset or tablet device and rely directly on the physical hardware of the device to collect sensor data. They derive their data by directly measuring specific environmental properties such as acceleration, geomagnetic field strength, or angular change. and are typically embedded within the device and function using electronic components such as accelerometers, gyroscopes, and magnetometers. 
+  - Software-based sensors are not physical components and derive their data from one or more of the hardware-based sensors. These sensors usually utilize complex software algorithms to integrate data from different hardware sensors and produce useful information. Software-based sensors themselves do not have specific physical components but leverage the output of hardware sensors. The linear acceleration sensor and the gravity sensor are examples
 of software-based sensors. <br/>
 <br/>
-in this project, we just had two sensors: an Accelerometer and a Gyroscope which both are hardware-based sensors.
-4. f
+- **in this project, we just had two sensors: an Accelerometer and a Gyroscope which both are hardware-based sensors.**
+4. first let's discuss about these two types of sensors:
+  - **Non-wake-up sensors**: Non-wake-up sensors are sensors that do not prevent the SoC from going into suspend mode and do not wake the SoC up to report data. In particular, the drivers are not allowed to hold wake-locks. It is the responsibility of applications to keep a partial wake lock should they wish to receive events from non-wake-up sensors while the screen is off. While the SoC is in suspend mode, the sensors must continue to function and generate events, which are put in a hardware FIFO. The events in the FIFO are delivered to the applications when the SoC wakes up. If the FIFO is too small to store all events, the older events are lost; the oldest data is dropped to accommodate the latest data. In the extreme case where the FIFO is nonexistent, all events generated while the SoC is in suspend mode are lost. One exception is the latest event from each on-change sensor: the last event must be saved outside of the FIFO so it cannot be lost. As soon as the SoC gets out of suspend mode, all events from the FIFO are reported and operations resume as normal.
+    - briefly we can say these sensors wakes up the device's processor only if the application is actively monitoring sensor data. If the application is not actively listening for sensor updates, the device remains in a low-power state.
+    - **Advantages**:
+      1. Power Efficiency: Reduces power consumption by minimizing unnecessary wake-ups when the application is not actively using sensor data.
+      2. Selective Wake-up: Allows the device to conserve power by waking up the processor only when sensor data is needed.
+    - **Disadvantages**:
+      1. Delayed Processing: May introduce delays in processing sensor data, especially if the application needs to wake up the processor first before receiving updates.
+      2. Potential Latency: In scenarios where immediate response is crucial, there might be a slight delay in receiving sensor updates.
+  - **Wake-up sensors**: In opposition to non-wake-up sensors, wake-up sensors ensure that their data is delivered independently of the state of the SoC. While the SoC is awake, the wake-up sensors behave like non-wake-up-sensors. When the SoC is asleep, wake-up sensors must wake up the SoC to deliver events. They must still let the SoC go into suspend mode, but must also wake it up when an event needs to be reported. That is, the sensor must wake the SoC up and deliver the events before the maximum reporting latency has elapsed or the hardware FIFO gets full.
+    - briefly we can say wake-up sensors are those that wake up the device's processor when new sensor data is available. This means that even when the device is in a low-power state or sleeping mode, these sensors can trigger the device to wake up and process the new data.
+    - **Advantages**:
+      1. Real-Time Responsiveness: Allows for immediate processing of sensor data, leading to real-time responsiveness in applications.
+      2. Timely Updates: Ensures that sensor data is promptly available for processing, reducing latency.
+    - **Disadvantages**:
+      1. Power Consumption: May consume more power as they can wake up the device frequently, potentially impacting battery life.
+      2. Background Activity: Continuous wake-ups may lead to unnecessary background activity, affecting overall system efficiency.
+
+- **Impact on Sensor Update and Movement Pattern Detection**: With wake-up sensors, the device can quickly receive sensor updates, leading to more responsive movement pattern detection. However, this may come at the cost of increased power consumption. but with non wake-up sensors may have slight delays in receiving sensor updates, potentially impacting the responsiveness of movement pattern detection, especially in real-time applications. 
 
 
 ## Test Application
