@@ -397,7 +397,7 @@ Accelerometer::Accelerometer(QObject *parent) : QObject(parent), x_bias(0.0), y_
 ```
 here we initialize member variables, including bias, Kalman filter, and velocities.
 the reason that we have bias is that when we do calibration we check the base state of velocity of the cellphone. and we name this initial state as bias and when we want to calculate new velocities we should consider this bias as well. Kalman filter is for noise reduction. we will explain its algorithm later. but briefly, it reduce the noise by choosing to consider and rely more on the older data or newer ones. In this way, sudden short changes in velocity won't affect the result. for the velocity we have 3 kinds, one for x direction and the other for y direction and one of them is the general velocity. <br/>
-these velocities will be calculated based on the acceleration and time by the formula: $ a * t = delta v $ and we need to add it to the previous velocity to reach the new velocity. 
+these velocities will be calculated based on the acceleration and time by the formula: $\ a * t = delta v $ and we need to add it to the previous velocity to reach the new velocity. 
 these velocities will be updated after each time interval. <br/>
 then we make an instance of the available `QAccelerometer` sensor object. <br/>
 we have two types of timers. One is for sampling intervals (timer) and the other (calibrationTimer) is for handling calibration. then we connect the timer signal to `onSensorReadingChanged` function. so whenever a timer reaches a specified time(we have specified the time intervals in this file in start method), and timeout occurs this function will be called. <br/>
@@ -879,11 +879,11 @@ qreal Movement::calculateDistanceTraveled() const
     return totalDistance;
 }
 ```
-in this function, we want to calculate the distance we have traveled till now in one movement. To do this we use this formula: $` ((v1 + v2)/2)*t $  in this formula we assume that acceleration is constant in one sampling interval.<br/>
+in this function, we want to calculate the distance we have traveled till now in one movement. To do this we use this formula: $\((v1 + v2)/2)*t $  in this formula we assume that acceleration is constant in one sampling interval.<br/>
 this function does these steps:
 - Iterates over each acceleration vector, updating the velocities: from the beginning of the movement start to calculate what a velocity is in each time interval.
 - Calculates the distance in each direction by the mentioned formula.
-- Sums up the distances to get the total distance traveled. (the total distance is calculated by the formula: $`\sqrt{x^2+y^2}$
+- Sums up the distances to get the total distance traveled. (the total distance is calculated by the formula: $\sqrt{x^2+y^2}$
 - update the previous velocity with the current one and then go through another iteration.
 ### Setting Start Position and Angle
 ```cpp
@@ -939,7 +939,7 @@ qreal Movement::calculateDistanceTraveledY() const
     return totalDistance;
 }
 ```
-in these functions, we want to calculate the distance in the x and y direction separately which we have traveled till now in one movement. To do this we use this formula: $` ((v1 + v2)/2)*t $ <br/>
+in these functions, we want to calculate the distance in the x and y direction separately which we have traveled till now in one movement. To do this we use this formula: $\ ((v1 + v2)/2)*t $ <br/>
 
 ### Current Position Calculation
 ```cpp
