@@ -1345,20 +1345,40 @@ we have created this file in order to save the json format of our patterns in it
   ![Alt text](Pics/QP_5.jpg)
   ![Alt text](Pics/QP_6.jpg)
   ![Alt text](Pics/QP_7.jpg)
+  
+  From the time a request to read data is given to a sensor until the data is received, various operations occur at the level of the operating system (OS). This process involves multiple components of the OS and spans several microseconds, with other OS-related tasks happening concurrently among these sensor threads.
+  
+  The initial request to read data from the sensor is made by an application (e.g., org.qtproject.example.appQtQuickProject). At this point, the main thread (qtMainLoop) handles the request and schedules it for processing. This initial processing by the main thread takes about 253 microseconds. During this time, the OS manages the allocation of the request to the correct sensor, ensuring that all necessary permissions and protocols are followed.
+  
+  Once the main thread processes the request, it is passed to the sensor handler within the OS. The sensor then starts reading the data. This phase, where the sensor hardware fetches the required data, spans from 253 to 293 microseconds, taking approximately 40 microseconds. The sensor's internal processes convert the physical signal into a digital form that the system can interpret. Concurrently, the OS continues to handle other tasks, such as managing system resources, executing background processes, and handling interrupts, ensuring smooth operation and multitasking.
+  
+  After the sensor reads the data, it is sent back to the OS. Initially, a low-level driver (often part of the kernel) receives this data. The driver translates the raw sensor data into a format that higher-level processes can use. This phase involves receiving and processing the sensor data by the OS, which occurs between 293 and 333 microseconds, taking another 40 microseconds. During this period, other OS tasks also execute, including maintaining system stability and handling other I/O operations.
+  
+  Finally, the processed data is handed over to the application that requested it. The OS scheduler allocates CPU time to the application to handle the incoming data, ensuring that the application receives the data accurately and efficiently. Meanwhile, the OS continues to juggle other tasks, such as updating system logs, managing memory, and ensuring that other applications and services run smoothly.
+  
+  In summary, from the time the request is made until the data is received, the process involves several steps: initial request processing (253 microseconds), sensor data handling (40 microseconds), and data reception and final delivery (40 microseconds). The total time elapsed is 333 microseconds. Throughout this process, the OS plays a crucial role in scheduling, managing permissions, and handling data transfers between the application and the sensor. Additionally, the OS executes other related tasks concurrently, ensuring efficient multitasking and system stability.
 
 - Compare the time between reading two consecutive data from the sensor in Perfetto with the sampling period you configured in your code.
   
   ![Alt text](Pics/QP_8.jpg)
   ![Alt text](Pics/QP_9.jpg)
   ![Alt text](Pics/QP_7.jpg)
+
+    The QtSensor system is designed to activate every 5 milliseconds, managing both the accelerometer and gyroscope sensors. This frequent activation ensures that the sensors are constantly providing up-to-date data, critical for applications requiring high precision and real-time feedback. By operating at this interval, the system can detect even the slightest changes in movement and orientation, enhancing the accuracy of measurements.
+    
+    Interestingly, the QtSensor's operation includes a broader cycle where these sensors are called approximately every 10 seconds. Initially, both the accelerometer and gyroscope are activated simultaneously, allowing for synchronized data collection. This simultaneous activation provides a comprehensive snapshot of the device's movement and orientation, which is crucial for applications like motion tracking and navigation.
+    
+    However, after the initial synchronization, the system introduces a staggered activation pattern. About 5 seconds after the first simultaneous call, there is a noticeable gap before one of the sensors is activated again. This pattern ensures that there is a periodic and alternating activation of the sensors, which can help in managing power consumption and processing loads more effectively. By spacing out the activations, the system maintains a balanced and efficient operation while still delivering frequent and accurate sensor data.
+    
+    Overall, the structured timing and activation strategy of the QtSensor system are designed to optimize both performance and resource management, ensuring reliable and efficient sensor data collection for any application relying on accelerometer and gyroscope inputs.
   
 - In system calls, is there a conflict (waiting busy for a Thread until another Thread finishes its work) between processes (for example, using the library related to graphics) and updating the sensors? Justify your answer.
   
   ![Alt text](Pics/QP_10.jpg)
   ![Alt text](Pics/QP_11.jpg)
   ![Alt text](Pics/QP_12.jpg)
-
-
+  
+  Following the scene graph update, synchronization threads come into play, weaving together the diverse threads of user input, rendering, and system tasks. The GUI thread syncs with rendering to exchange vital information, while the render thread ensures data integrity before its spotlight moment. It's a backstage hustle, ensuring that every component is in place before the grand performance begins, with each thread playing its part in harmonizing the intricate dance between CPU and GPU, ultimately delivering a seamless visual experience.
   
 - Compare the time needed to process sensor data with the time of other CPU processes.
   ![Alt text](Pics/QP_1.jpg)
@@ -1464,3 +1484,33 @@ of software-based sensors. <br/>
 
 ![Alt text](Pics/screenshot_18.jpg)
 
+## Duties
+
+- Initial introduction and initial setup -> Bardia Fatemeh
+- ui -> Bardia Fatemeh
+- Report -> Maryam
+- Angle (with calibration) -> Fatima 
+- Distance (with calibration) -> Berdia
+- Performance and work analysis and work report -> Atta
+
+## Reference
+
+- https://doc.qt.io/qt-6/
+- https://doc.qt.io/qt-6/qtsensors-index.html
+- https://doc.qt.io/qt-6/signalsandslots.html
+- https://doc.qt.io/qt-6/qtquick-index.html
+- https://doc.qt.io/qt-6/qtquick-visualcanvas-scenegraph.html
+
+## tools and libraries
+
+- qt quick
+- QtSensors/QAccelerometer
+- QtSensors/QGyroscope
+- QList
+- QJsonArray
+- QJsonObject
+- QJsonDocument
+- cmath
+
+- Software platform specifications: qtquick with cpp
+- Hardware: Android Qt 6.7 Clang arm64-v8a
