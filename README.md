@@ -1346,6 +1346,7 @@ sensors.
 of software-based sensors. <br/>
 <br/>
 - **in this project, we just had two sensors: an Accelerometer and a Gyroscope which both are hardware-based sensors.**
+<br/>
 4. first let's discuss about these two types of sensors:
   - **Non-wake-up sensors**: Non-wake-up sensors are sensors that do not prevent the SoC from going into suspend mode and do not wake the SoC up to report data. In particular, the drivers are not allowed to hold wake-locks. It is the responsibility of applications to keep a partial wake lock should they wish to receive events from non-wake-up sensors while the screen is off. While the SoC is in suspend mode, the sensors must continue to function and generate events, which are put in a hardware FIFO. The events in the FIFO are delivered to the applications when the SoC wakes up. If the FIFO is too small to store all events, the older events are lost; the oldest data is dropped to accommodate the latest data. In the extreme case where the FIFO is nonexistent, all events generated while the SoC is in suspend mode are lost. One exception is the latest event from each on-change sensor: the last event must be saved outside of the FIFO so it cannot be lost. As soon as the SoC gets out of suspend mode, all events from the FIFO are reported and operations resume as normal.
     - briefly we can say these sensors wakes up the device's processor only if the application is actively monitoring sensor data. If the application is not actively listening for sensor updates, the device remains in a low-power state.
