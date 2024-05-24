@@ -1228,3 +1228,4 @@ QJsonArray Pattern::toJson() const
     return jsonArray;
 }
 ```
+this function is used to write and save our pattern in JSON format. we have a `movementJson` object which consists of `startJson`(contains x and y of the start position) and `endJson`(contains the last x and y position) objects. and also it have direction and angle fields too. 
