@@ -1388,3 +1388,23 @@ of software-based sensors. <br/>
 ![Alt text](Pics/screenshot_8.jpg)
 
 ### Up and right with rotation
+
+![Alt text](Pics/screenshot_9.jpg)
+
+![Alt text](Pics/screenshot_10.jpg)
+
+![Alt text](Pics/screenshot_11.jpg)
+
+![Alt text](Pics/screenshot_12.jpg)
+
+![Alt text](Pics/screenshot_13.jpg)
+
+![Alt text](Pics/screenshot_14.jpg)
+
+![Alt text](Pics/screenshot_15.jpg)
+
+![Alt text](Pics/screenshot_16.jpg)
+
+![Alt text](Pics/screenshot_17.jpg)
+
+![Alt text](Pics/screenshot_18.jpg)
